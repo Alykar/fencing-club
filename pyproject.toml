@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "fencing-club"
+version = "0.1.0"
+description = ""
+authors = ["Danil Stepanchuk <d.stepanchuk@radmadrobot.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.14"
+alembic = "^1.18.4"
+fastapi = "^0.136.1"
+pydantic = "^2.13.3"
+pytest = "^9.0.3"
+lagom = "^2.7.7"
+pydantic-settings = "^2.14.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
