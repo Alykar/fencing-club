@@ -2,7 +2,7 @@
 name = "fencing-club"
 version = "0.1.0"
 description = ""
-authors = ["Danil Stepanchuk <d.stepanchuk@radmadrobot.com>"]
+authors = ["Danil Stepanchuk <alykar90@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -13,6 +13,12 @@ pydantic = "^2.13.3"
 pytest = "^9.0.3"
 lagom = "^2.7.7"
 pydantic-settings = "^2.14.0"
+asyncpg = "^0.31.0"
+orjson = "^3.11.8"
+sqlparams = "^6.2.0"
+make = "^0.1.6.post2"
+ruff = "^0.15.12"
+mypy = "^1.20.2"
 
 
 [build-system]
