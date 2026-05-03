@@ -19,6 +19,7 @@ sqlparams = "^6.2.0"
 make = "^0.1.6.post2"
 ruff = "^0.15.12"
 mypy = "^1.20.2"
+bcrypt = "^5.0.0"
 
 
 [build-system]
