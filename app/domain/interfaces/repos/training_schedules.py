@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from uuid import UUID
 
 from domain.entities.enums.schedule_status import ScheduleStatus
@@ -12,7 +13,12 @@ class TrainingSchedulesRepo(ABC):
         ...
 
     @abstractmethod
-    async def list_by_status(self, status: ScheduleStatus) -> list[TrainingSchedule]:
+    async def list_by_status(
+        self,
+        status: ScheduleStatus,
+        populate_till_gte: datetime,
+        populate_from_lte: datetime,
+    ) -> list[TrainingSchedule]:
         ...
 
     @abstractmethod

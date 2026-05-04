@@ -1,3 +1,5 @@
+from datetime import datetime, UTC
+
 from domain.entities.enums.schedule_status import ScheduleStatus
 from domain.entities.enums.user_role import UserRole
 from domain.interfaces.repos.training_session_schedules import TrainingSchedulesRepo
@@ -13,7 +15,12 @@ class PopulateTrainingSessionsFromScheduleUseCase:
 
     @require_auth(UserRole.INSTRUCTOR)
     async def __call__(self, auth_user: AuthUser) -> None:
-        schedules = await self._schedules.list_by_status(ScheduleStatus.ACTIVE)
+        now = datetime.now(UTC)
+        schedules = await self._schedules.list_by_status(
+            ScheduleStatus.ACTIVE,
+            populate_from_lte=now,
+            populate_till_gte=now,
+        )
 
         if not schedules:
             return
