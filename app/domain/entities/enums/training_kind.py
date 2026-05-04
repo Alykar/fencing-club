@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class TrainingClassKind(StrEnum):
+class TrainingKind(StrEnum):
     SABRE = "sabre"
     LONGSWORD = "longsword"
     SPARRING = "sparring"

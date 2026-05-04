@@ -1,3 +1,4 @@
+from datetime import datetime, UTC
 from typing import Self
 from uuid import UUID
 
@@ -5,12 +6,16 @@ from pydantic import BaseModel
 
 
 class Attendance(BaseModel):
-    class_id: UUID
+    training_id: UUID
     user_id: UUID
+    created_by: UUID
+    created_at: datetime
 
     @classmethod
-    def create(cls, class_id: UUID, user_id: UUID) -> Self:
+    def create(cls, training_id: UUID, user_id: UUID, created_by: UUID) -> Self:
         return cls(
-            class_id=class_id,
+            training_id=training_id,
             user_id=user_id,
+            created_by=created_by,
+            created_at=datetime.now(UTC)
         )

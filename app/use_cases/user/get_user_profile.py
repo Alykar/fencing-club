@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from domain.entities.enums.user_role import UserRole
 from domain.errors import UserNotFoundError
 from domain.interfaces.repos.users import UsersRepo
+from domain.permission_check import require_auth
 from domain.utills.classes.auth_user import AuthUser
 
 
@@ -23,6 +24,7 @@ class GetUserProfileUseCase:
     def __init__(self, users: UsersRepo) -> None:
         self._users = users
 
+    @require_auth(UserRole.USER)
     async def __call__(self, auth_user: AuthUser) -> GetUserProfileOutput:
         user = await self._users.get_by_id(user_id=auth_user.id)
 

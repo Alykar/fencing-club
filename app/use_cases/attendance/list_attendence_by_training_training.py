@@ -9,24 +9,24 @@ from domain.permission_check import require_auth
 from domain.utills.classes.auth_user import AuthUser
 
 
-class ListAttendanceByUserInput(BaseModel):
-    user_id: UUID
+class ListAttendanceByTrainingSessionInput(BaseModel):
+    training_session_id: UUID
 
 
-class ListAttendanceByUserOutput(BaseModel):
+class ListAttendanceByTrainingSessionOutput(BaseModel):
     attendances: list[Attendance]
 
 
-class ListAttendanceByUserUseCase:
+class ListAttendanceByTrainingSessionUseCase:
     def __init__(self, attendances: AttendancesRepo) -> None:
         self._attendances = attendances
 
     @require_auth(UserRole.INSTRUCTOR)
     async def __call__(
         self,
-        data: ListAttendanceByUserInput,
+        data: ListAttendanceByTrainingSessionInput,
         auth_user: AuthUser,
-    ) -> ListAttendanceByUserOutput:
-        attendances = await self._attendances.list_by_user_id(data.user_id)
+    ) -> ListAttendanceByTrainingSessionOutput:
+        attendances = await self._attendances.list_by_training_session_id(data.training_session_id)
 
-        return ListAttendanceByUserOutput(attendances=attendances)
+        return ListAttendanceByTrainingSessionOutput(attendances=attendances)
