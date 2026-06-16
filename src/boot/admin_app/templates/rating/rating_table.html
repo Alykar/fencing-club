@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Рейтинг — ULTRA{% endblock %}
+{% block content %}
+<div style="display:flex;flex-direction:column;gap:14px;">
+
+  <div class="page-title">Рейтинг</div>
+
+  <div class="card" style="overflow:hidden;">
+
+    {% if rows %}
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="padding:10px 16px;text-align:left;font-size:9px;letter-spacing:0.12em;
+                     color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                     text-transform:uppercase;">#</th>
+          <th style="padding:10px 12px;text-align:left;font-size:9px;letter-spacing:0.12em;
+                     color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                     text-transform:uppercase;">Участник</th>
+          <th style="padding:10px 12px;text-align:right;font-size:9px;letter-spacing:0.12em;
+                     color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                     text-transform:uppercase;">ELO</th>
+          <th style="padding:10px 12px;text-align:right;font-size:9px;letter-spacing:0.12em;
+                     color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                     text-transform:uppercase;">Побед</th>
+          <th style="padding:10px 16px;text-align:right;font-size:9px;letter-spacing:0.12em;
+                     color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                     text-transform:uppercase;">Матчей</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.1s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.02)'"
+            onmouseout="this.style.background=''">
+
+          <!-- Место -->
+          <td style="padding:11px 16px;">
+            {% if not row.calibrating %}
+            <span style="color:{% if loop.index == 1 %}#C9A96E{% elif loop.index == 2 %}#9A9590{% elif loop.index == 3 %}#8A6030{% else %}#3D3A36{% endif %};
+                         font-size:{% if loop.index <= 3 %}14px{% else %}12px{% endif %};font-weight:700;">
+              {{ loop.index }}
+            </span>
+            {% else %}
+            <span style="color:#3D3A36;font-size:10px;letter-spacing:0.06em;">—</span>
+            {% endif %}
+          </td>
+
+          <!-- Имя -->
+          <td style="padding:11px 12px;">
+            <span style="color:{% if row.calibrating %}#9A9590{% else %}#F5F1EC{% endif %};font-size:13px;font-weight:500;">
+              {{ row.name }}
+            </span>
+            {% if row.calibrating %}
+            <div style="color:#4A4540;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px;">
+              калибровка
+            </div>
+            {% endif %}
+          </td>
+
+          <!-- ELO -->
+          <td style="padding:11px 12px;text-align:right;">
+            {% if row.calibrating %}
+            <span style="color:#3D3A36;font-size:12px;">?</span>
+            {% else %}
+            <span class="num-display" style="color:#C9A96E;font-size:15px;font-weight:700;">{{ row.elo }}</span>
+            {% endif %}
+          </td>
+
+          <!-- Винрейт -->
+          <td style="padding:11px 12px;text-align:right;">
+            <span style="font-size:12px;font-weight:700;
+                         color:{% if row.win_rate >= 60 %}#1DB87E{% elif row.win_rate >= 40 %}#C9A96E{% else %}#E05555{% endif %};">
+              {{ row.win_rate }}%
+            </span>
+            <div style="color:#3D3A36;font-size:9px;margin-top:1px;">{{ row.wins }}/{{ row.matches }}</div>
+          </td>
+
+          <!-- Кол-во матчей -->
+          <td style="padding:11px 16px;text-align:right;">
+            <span style="color:#4A4540;font-size:13px;">{{ row.matches }}</span>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% else %}
+    <div style="padding:56px 20px;text-align:center;color:#4A4540;font-size:11px;letter-spacing:0.1em;">
+      НЕТ ДАННЫХ
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

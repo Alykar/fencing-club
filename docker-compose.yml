@@ -1,0 +1,45 @@
+version: "3.9"
+
+networks:
+  app_net:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:16-alpine
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES__DB}
+      POSTGRES_USER: ${POSTGRES__USER}
+      POSTGRES_PASSWORD: ${POSTGRES__PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"   # dev: доступен локально для psql/миграций, но не из сети
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES__USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    env_file: .env
+    environment:
+      POSTGRES__HOST: db
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    volumes:
+      - ./src:/app/src
+    networks:
+      - app_net
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pg_data:

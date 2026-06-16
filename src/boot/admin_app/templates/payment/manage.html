@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}Финансы — ULTRA{% endblock %}
+{% block content %}
+<div style="display:flex;flex-direction:column;gap:16px;">
+
+  <div class="page-title">Финансы</div>
+
+  <!-- ── Форма внесения — только admin ─────────────────────────── -->
+  {% if is_admin %}
+  <div class="card card-accent" style="border-radius:18px;">
+    <div class="card-section">
+      <div class="gold-label">Внести оплату</div>
+    </div>
+    <div class="card-body">
+      <form method="post" action="/admin/payment" style="display:flex;flex-direction:column;gap:14px;">
+
+        <div>
+          <label class="section-label" style="display:block;margin-bottom:7px;">Участник</label>
+          <select name="user_id" required class="input">
+            <option value="">— выберите —</option>
+            {% for u in users %}
+            <option value="{{ u.id }}">{{ u.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Сумма (₽)</label>
+            <input type="number" name="amount" min="0" step="100" required class="input" placeholder="0"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Дата платежа</label>
+            <div class="date-wrap">
+              <input type="text" class="input date-display" placeholder="ДД/ММ/ГГГГ"
+                     maxlength="10" inputmode="numeric" oninput="fmtDate(this)"
+                     pattern="[0-3][0-9]/[0-1][0-9]/[0-9]{4}" required/>
+              <input type="date" class="date-real" name="paid_at" value="{{ today }}"/>
+              <button type="button" class="date-cal" onclick="openDatePicker(this)" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <label class="check-row">
+          <input type="checkbox" name="is_one_time" value="true"/>
+          Разовое занятие
+        </label>
+
+        <div>
+          <label class="section-label" style="display:block;margin-bottom:7px;">Примечание</label>
+          <input type="text" name="note" class="input" placeholder="Опционально"/>
+        </div>
+
+        <button type="submit" class="btn-primary" style="align-self:stretch;text-align:center;">Добавить</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Сводная таблица ────────────────────────────────────────── -->
+  <div class="card" style="overflow:hidden;">
+
+    <!-- Вкладки месяцев -->
+    <div style="display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,0.06);overflow-x:auto;">
+      {% for tab in tabs %}
+      <a href="/admin/payment?month={{ tab.month }}&year={{ tab.year }}"
+         style="flex:1;min-width:max-content;padding:11px 16px;text-align:center;
+                text-decoration:none;font-size:10px;font-weight:700;letter-spacing:0.08em;
+                text-transform:uppercase;transition:background 0.15s;white-space:nowrap;
+                {% if tab.active %}
+                  color:#C9A96E;border-bottom:2px solid #C9A96E;margin-bottom:-1px;background:rgba(201,169,110,0.06);
+                {% else %}
+                  color:#4A4540;border-bottom:2px solid transparent;
+                {% endif %}"
+         onmouseover="if(!{{ 'true' if tab.active else 'false' }})this.style.color='#9A9590'"
+         onmouseout="if(!{{ 'true' if tab.active else 'false' }})this.style.color='#4A4540'">
+        {{ tab.label }}{% if loop.index == 1 %} (текущий){% endif %}
+      </a>
+      {% endfor %}
+
+      <!-- Кастомный выбор -->
+      <form method="get" action="/admin/payment"
+            style="flex:1;min-width:140px;display:flex;align-items:center;padding:6px 12px;gap:6px;
+                   border-left:1px solid rgba(255,255,255,0.06);">
+        <select name="month" class="input" style="padding:4px 6px;font-size:11px;flex:1;min-width:0;">
+          {% for m in range(1,13) %}
+          {% set mn = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"][m-1] %}
+          <option value="{{ m }}" {% if m == sel_month %}selected{% endif %}>{{ mn }}</option>
+          {% endfor %}
+        </select>
+        <input type="number" name="year" min="2020" max="2099"
+               value="{{ sel_year }}"
+               class="input" style="padding:4px 6px;font-size:11px;width:64px;"/>
+        <button type="submit" class="btn-primary"
+                style="padding:4px 10px;font-size:10px;white-space:nowrap;">→</button>
+      </form>
+    </div>
+
+    <!-- Статистика месяца -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.05);
+                border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="background:#0A0A0A;padding:14px 16px;text-align:center;">
+        <div class="num-display" style="color:#C9A96E;font-size:22px;font-weight:700;">
+          {{ "%.0f" | format(total_month_amount) }}
+          <span style="font-size:13px;">₽</span>
+        </div>
+        <div style="color:#3D3A36;font-size:9px;letter-spacing:0.1em;margin-top:3px;text-transform:uppercase;">собрано</div>
+      </div>
+      <div style="background:#0A0A0A;padding:14px 16px;text-align:center;">
+        <div class="num-display" style="color:#F5F1EC;font-size:22px;font-weight:700;">{{ paid_count }}</div>
+        <div style="color:#3D3A36;font-size:9px;letter-spacing:0.1em;margin-top:3px;text-transform:uppercase;">заплатили</div>
+      </div>
+      <div style="background:#0A0A0A;padding:14px 16px;text-align:center;">
+        <div class="num-display" style="color:#1DB87E;font-size:22px;font-weight:700;">{{ total_attendance }}</div>
+        <div style="color:#3D3A36;font-size:9px;letter-spacing:0.1em;margin-top:3px;text-transform:uppercase;">посещений</div>
+      </div>
+    </div>
+
+    {% if table_rows %}
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;min-width:400px;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.02);">
+            <th style="padding:8px 16px;text-align:left;font-size:9px;letter-spacing:0.12em;
+                       color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                       text-transform:uppercase;white-space:nowrap;">Участник</th>
+            <th style="padding:8px 12px;text-align:right;font-size:9px;letter-spacing:0.12em;
+                       color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                       text-transform:uppercase;white-space:nowrap;">Действует до</th>
+            <th style="padding:8px 12px;text-align:right;font-size:9px;letter-spacing:0.12em;
+                       color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                       text-transform:uppercase;white-space:nowrap;">За месяц</th>
+            <th style="padding:8px 16px;text-align:right;font-size:9px;letter-spacing:0.12em;
+                       color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);
+                       text-transform:uppercase;white-space:nowrap;">Трен.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set ns = namespace(prev_role=None) %}
+          {% for row in table_rows %}
+          {# Разделитель при смене роли #}
+          {% if row.role != ns.prev_role and ns.prev_role is not none %}
+          <tr><td colspan="4" style="padding:0;height:1px;background:rgba(255,255,255,0.08);"></td></tr>
+          {% endif %}
+          {% set ns.prev_role = row.role %}
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.1s;"
+              onmouseover="this.style.background='rgba(255,255,255,0.02)'"
+              onmouseout="this.style.background=''">
+            <!-- Участник + роль -->
+            <td style="padding:10px 16px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                {% if row.role == 'admin' %}
+                <span style="font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+                             color:#C9A96E;background:rgba(201,169,110,0.12);border-radius:4px;
+                             padding:2px 5px;flex-shrink:0;">АДМ</span>
+                {% elif row.role == 'instructor' %}
+                <span style="font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+                             color:#1DB87E;background:rgba(29,184,126,0.12);border-radius:4px;
+                             padding:2px 5px;flex-shrink:0;">ИНС</span>
+                {% endif %}
+                <span style="color:#F5F1EC;font-size:13px;font-weight:500;">{{ row.name }}</span>
+              </div>
+            </td>
+            <!-- Действует до -->
+            <td style="padding:10px 12px;text-align:right;white-space:nowrap;">
+              {% if row.paid_until %}
+                {% if row.paid_until_status == 'expired' %}
+                <span style="color:#E05252;font-size:11px;font-weight:700;">
+                  {{ row.paid_until.strftime('%d.%m.%y') }}
+                </span>
+                <div style="color:#E05252;font-size:8px;letter-spacing:0.08em;text-transform:uppercase;">истёк</div>
+                {% elif row.paid_until_status == 'expiring' %}
+                <span class="num-display" style="color:#C9A96E;font-size:11px;font-weight:700;">
+                  {{ row.paid_until.strftime('%d.%m.%y') }}
+                </span>
+                <div style="color:#C9A96E;font-size:8px;letter-spacing:0.08em;text-transform:uppercase;">скоро</div>
+                {% else %}
+                <span class="num-display" style="color:#1DB87E;font-size:11px;font-weight:700;">
+                  {{ row.paid_until.strftime('%d.%m.%y') }}
+                </span>
+                {% endif %}
+              {% else %}
+              <span style="color:#3D3A36;font-size:11px;">—</span>
+              {% endif %}
+            </td>
+            <!-- Оплата за выбранный месяц -->
+            <td style="padding:10px 12px;text-align:right;">
+              {% if row.month_amount > 0 %}
+              <span class="num-display" style="color:#1DB87E;font-size:14px;font-weight:700;">
+                {{ "%.0f" | format(row.month_amount) }} ₽
+              </span>
+              {% else %}
+              <span style="color:#3D3A36;font-size:13px;">—</span>
+              {% endif %}
+            </td>
+            <!-- Тренировки -->
+            <td style="padding:10px 16px;text-align:right;">
+              {% if row.attendance > 0 %}
+              <span style="display:inline-flex;align-items:center;justify-content:center;
+                           min-width:24px;height:24px;border-radius:6px;padding:0 5px;
+                           background:rgba(29,184,126,0.12);color:#1DB87E;
+                           font-size:12px;font-weight:700;">{{ row.attendance }}</span>
+              {% else %}
+              <span style="color:#3D3A36;font-size:12px;">0</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="padding:40px 20px;text-align:center;color:#4A4540;font-size:11px;letter-spacing:0.1em;">
+      В ЭТОМ МЕСЯЦЕ ДАННЫХ НЕТ
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

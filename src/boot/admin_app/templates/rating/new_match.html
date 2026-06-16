@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Новый матч — ULTRA{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
+
+  <div style="display:flex;align-items:center;gap:12px;">
+    <a href="/admin/match" style="color:#4A4540;text-decoration:none;font-size:20px;line-height:1;
+                                   transition:color 0.15s;" onmouseover="this.style.color='#9A9590'" onmouseout="this.style.color='#4A4540'">←</a>
+    <div>
+      <div style="color:#1DB87E;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:2px;">Рейтинговый</div>
+      <div class="page-title" style="font-size:20px;">Новый матч</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-radius:20px;border:1px solid rgba(29,184,126,0.15);">
+    <div class="card-body">
+      <form method="post" action="/admin/rating/match" style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- Участники -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Боец слева</label>
+            <select name="left_user_id" required class="input">
+              <option value="">— выбрать —</option>
+              {% for u in users %}
+              <option value="{{ u.id }}">{{ u.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Боец справа</label>
+            <select name="right_user_id" required class="input">
+              <option value="">— выбрать —</option>
+              {% for u in users %}
+              <option value="{{ u.id }}">{{ u.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Оружие по боям -->
+        <div>
+          <div class="section-label" style="margin-bottom:10px;">Оружие по боям</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            {% for bout_n in [1, 2, 3] %}
+            <div style="display:grid;grid-template-columns:72px 1fr;align-items:center;gap:10px;">
+              <div style="color:#4A4540;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;">
+                Бой {{ bout_n }}
+              </div>
+              <select name="weapon_type_ids" required class="input">
+                <option value="">— оружие —</option>
+                {% for w in weapons %}
+                <option value="{{ w.id }}">{{ w.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" style="align-self:stretch;text-align:center;padding:14px;"
+                onclick="return validateWeapons(this.form)">
+          Начать матч
+        </button>
+      </form>
+
+      <!-- Добавить оружие -->
+      <div style="height:1px;background:rgba(255,255,255,0.05);margin:20px 0;"></div>
+      <div class="section-label" style="margin-bottom:10px;">Добавить новое оружие</div>
+      <form method="post" action="/admin/rating/weapons" style="display:flex;gap:10px;">
+        <input type="text" name="name" required class="input" placeholder="Название оружия"/>
+        <button type="submit" class="btn-ghost" style="flex-shrink:0;padding:10px 18px;">+</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function validateWeapons(form) {
+  const selects = form.querySelectorAll('[name="weapon_type_ids"]');
+  for (const s of selects) {
+    if (!s.value) { s.focus(); return false; }
+  }
+  const left  = form.querySelector('[name="left_user_id"]').value;
+  const right = form.querySelector('[name="right_user_id"]').value;
+  if (!left || !right) return true;
+  if (left === right) {
+    alert('Нельзя выбрать одного участника дважды');
+    return false;
+  }
+  return true;
+}
+</script>
+{% endblock %}

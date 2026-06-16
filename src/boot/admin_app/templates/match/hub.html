@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Бои и Табата — ULTRA{% endblock %}
+{% block content %}
+<div style="display:flex;flex-direction:column;gap:16px;max-width:480px;margin:0 auto;">
+
+  <div class="page-title">Бои и Табата</div>
+
+  <!-- Нерейтинговый бой -->
+  <a href="/admin/match/start" style="text-decoration:none;display:block;">
+    <div class="card" style="border-radius:20px;padding:24px;transition:transform 0.15s,box-shadow 0.15s;border:1px solid rgba(201,169,110,0.15);"
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(201,169,110,0.10)'"
+         onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div style="display:flex;align-items:center;gap:18px;">
+        <div style="width:52px;height:52px;border-radius:14px;background:rgba(201,169,110,0.10);
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            <circle cx="12" cy="12" r="2" fill="#C9A96E" stroke="none"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="color:#C9A96E;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:5px;">
+            Нерейтинговый
+          </div>
+          <div style="color:#F5F1EC;font-size:18px;font-weight:700;letter-spacing:0.04em;margin-bottom:6px;">
+            Бой
+          </div>
+          <div style="color:#4A4540;font-size:11px;line-height:1.5;">
+            Свободный бой с таймером и счётом. Без записей в базе.
+          </div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A4540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+  <!-- Рейтинговый матч — только instructor+ -->
+  {% if auth_user.role.value in ("instructor", "admin") %}
+  <a href="/admin/rating/new" style="text-decoration:none;display:block;">
+    <div class="card" style="border-radius:20px;padding:24px;transition:transform 0.15s,box-shadow 0.15s;border:1px solid rgba(29,184,126,0.15);"
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(29,184,126,0.10)'"
+         onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div style="display:flex;align-items:center;gap:18px;">
+        <div style="width:52px;height:52px;border-radius:14px;background:rgba(29,184,126,0.10);
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1DB87E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+            <path d="M4 22h16"/>
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="color:#1DB87E;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:5px;">
+            Рейтинговый
+          </div>
+          <div style="color:#F5F1EC;font-size:18px;font-weight:700;letter-spacing:0.04em;margin-bottom:6px;">
+            Матч
+          </div>
+          <div style="color:#4A4540;font-size:11px;line-height:1.5;">
+            3 боя · 3 схода за бой. ELO обновляется автоматически.
+          </div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A4540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+  {% endif %}
+
+  <!-- Табата -->
+  <a href="/admin/tabata" style="text-decoration:none;display:block;">
+    <div class="card" style="border-radius:20px;padding:24px 24px;transition:transform 0.15s,box-shadow 0.15s;border:1px solid rgba(255,255,255,0.05);"
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(255,255,255,0.04)'"
+         onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div style="display:flex;align-items:center;gap:18px;">
+        <div style="width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,0.05);
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9A9590" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="color:#9A9590;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:5px;">
+            Таймер
+          </div>
+          <div style="color:#F5F1EC;font-size:18px;font-weight:700;letter-spacing:0.04em;margin-bottom:6px;">
+            Табата
+          </div>
+          <div style="color:#4A4540;font-size:11px;line-height:1.5;">
+            Интервальный таймер. Настройки сохраняются автоматически.
+          </div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A4540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+</div>
+{% endblock %}

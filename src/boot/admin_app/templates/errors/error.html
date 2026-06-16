@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — ULTRA{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+            text-align:center;padding:40px 20px;">
+
+  <div class="num-display"
+       style="font-size:96px;font-weight:700;line-height:1;
+              color:{{ '#E05555' if code == 403 else '#C9A96E' if code == 404 else '#E05555' }};
+              opacity:0.18;margin-bottom:8px;">
+    {{ code }}
+  </div>
+
+  <div class="page-title" style="font-size:18px;margin-bottom:12px;margin-top:-16px;position:relative;z-index:1;">
+    {{ title }}
+  </div>
+
+  <div style="color:#4A4540;font-size:12px;letter-spacing:0.06em;max-width:300px;line-height:1.8;
+              margin-bottom:36px;">
+    {{ message }}
+  </div>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+    <a href="/admin/profile" class="btn-primary" style="padding:12px 28px;text-decoration:none;">
+      На главную
+    </a>
+    <button onclick="history.back()" class="btn-ghost" style="padding:12px 20px;">
+      Назад
+    </button>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Новые заявки — ULTRA{% endblock %}
+{% block content %}
+<div style="display:flex;flex-direction:column;gap:14px;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="page-title">Новые заявки</div>
+    <a href="/admin/users" class="btn-ghost" style="padding:8px 14px;font-size:10px;">← Участники</a>
+  </div>
+
+  <div class="card">
+    {% for member in members %}
+    <div class="list-row" style="align-items:flex-start;gap:12px;">
+      <div style="flex:1;min-width:0;">
+        <div style="color:#F5F1EC;font-size:15px;font-weight:600;">{{ member.name }}</div>
+        <div style="color:#9A9590;font-size:12px;margin-top:3px;">{{ member.email }}</div>
+        <div style="color:#9A9590;font-size:12px;">{{ member.tel }}</div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          {% if member.tg %}<span class="badge badge-muted">TG: {{ member.tg }}</span>{% endif %}
+          {% if member.vk %}<span class="badge badge-muted">VK: {{ member.vk }}</span>{% endif %}
+          <span class="badge badge-gold">{{ member.referral_source.value }}</span>
+          {% if member.friend_name %}<span class="badge badge-muted">{{ member.friend_name }}</span>{% endif %}
+        </div>
+        <div style="color:#3D3A36;font-size:10px;letter-spacing:0.06em;margin-top:6px;">
+          {{ member.created_at.strftime('%d.%m.%Y') }}
+        </div>
+      </div>
+      <form method="post" action="/admin/users/{{ member.id }}/grant-access" style="flex-shrink:0;margin-top:2px;">
+        <button class="btn-primary" style="padding:10px 16px;font-size:10px;white-space:nowrap;">
+          Выдать проходку
+        </button>
+      </form>
+    </div>
+    {% else %}
+    <div style="padding:48px 20px;text-align:center;color:#4A4540;font-size:11px;letter-spacing:0.1em;">
+      НОВЫХ ЗАЯВОК НЕТ
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

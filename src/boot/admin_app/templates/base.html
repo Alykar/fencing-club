@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>{% block title %}ULTRA Fencing Club{% endblock %}</title>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            g: {
+              gold:    '#C9A96E',
+              'gold-lt': '#E8C97A',
+              'gold-dk': '#8A7248',
+              green:   '#1DB87E',
+              'green-dk': '#0F6645',
+              ink:     '#0A0A0A',
+              s1:      '#111214',
+              s2:      '#161A1D',
+              s3:      '#1E2328',
+              line:    'rgba(255,255,255,0.07)',
+              'line-gold': 'rgba(201,169,110,0.2)',
+              t1:      '#F5F1EC',
+              t2:      '#9A9590',
+              t3:      '#4A4540',
+              red:     '#E05555',
+            }
+          },
+          fontFamily: {
+            sans:    ['"Engravers Gothic BT"', '"Engravers Gothic"', '"Century Gothic"', '"Gill Sans"', 'system-ui', 'sans-serif'],
+            display: ['"Engravers Gothic BT"', '"Engravers Gothic"', '"Century Gothic"', 'serif'],
+            mono:    ['"Engravers Gothic BT"', '"Engravers Gothic"', '"Century Gothic"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+
+  <style>
+    @font-face {
+      font-family: 'Engravers Gothic BT';
+      src: url('/static/fonts/EngraversGothicBT-Regular.woff2') format('woff2'),
+           url('/static/fonts/EngraversGothicBT-Regular.woff')  format('woff');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Engravers Gothic BT';
+      src: url('/static/fonts/EngraversGothicBT-Bold.woff2') format('woff2'),
+           url('/static/fonts/EngraversGothicBT-Bold.woff')  format('woff');
+      font-weight: 700; font-style: normal; font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { background: #0A0A0A; }
+
+    body {
+      background: #0A0A0A;
+      color: #F5F1EC;
+      font-family: 'Engravers Gothic BT','Engravers Gothic','Century Gothic','Gill Sans',system-ui,sans-serif;
+      letter-spacing: 0.02em;
+      -webkit-font-smoothing: antialiased;
+      /* Space for bottom nav on mobile */
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    /* ── SCROLLBAR ──────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 3px; height: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.25); border-radius: 2px; }
+
+    /* ── TOP HEADER ─────────────────────────────────────────────── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ── BOTTOM NAV (mobile) ────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: rgba(12,12,12,0.97);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .bn-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; padding: 8px 4px; flex: 1;
+      color: #4A4540; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+      text-decoration: none; transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bn-item svg { width: 22px; height: 22px; transition: all 0.15s; }
+    .bn-item.active { color: #C9A96E; }
+    .bn-item.active svg { color: #C9A96E; }
+    .bn-item:not(.active):active { color: #9A9590; }
+
+    /* ── DRAWER (more menu) ─────────────────────────────────────── */
+    #drawer-overlay {
+      display: none; position: fixed; inset: 0; z-index: 60;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    }
+    #drawer-overlay.open { display: block; }
+    #drawer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 70;
+      background: #111214;
+      border-top: 1px solid rgba(201,169,110,0.2);
+      border-radius: 20px 20px 0 0;
+      padding: 8px 0 calc(72px + env(safe-area-inset-bottom, 0));
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    #drawer.open { transform: translateY(0); }
+    .drawer-handle {
+      width: 36px; height: 4px; background: rgba(255,255,255,0.15);
+      border-radius: 2px; margin: 0 auto 16px;
+    }
+    .drawer-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 24px; color: #9A9590; font-size: 13px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      text-decoration: none; transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .drawer-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .drawer-item.active { color: #C9A96E; }
+    .drawer-item:not(.active):active { color: #F5F1EC; }
+    .drawer-section {
+      font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: #3D3A36; padding: 8px 24px 4px;
+    }
+
+    /* ── CARDS ──────────────────────────────────────────────────── */
+    .card {
+      background: #111214;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .card-gold {
+      background: #111214;
+      border: 1px solid rgba(201,169,110,0.2);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    /* Thin gold top accent for hero cards */
+    .card-accent::before {
+      content: ''; display: block;
+      height: 2px; background: linear-gradient(90deg, #C9A96E 0%, rgba(201,169,110,0.3) 60%, transparent 100%);
+    }
+    .card-section {
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .card-body { padding: 20px; }
+
+    /* ── INPUTS ─────────────────────────────────────────────────── */
+    .input {
+      width: 100%;
+      background: #0D0D0D;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #F5F1EC;
+      font-family: inherit;
+      letter-spacing: 0.02em;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+      -webkit-appearance: none;
+    }
+    .input:focus { border-color: #C9A96E; background: #111214; }
+    .input::placeholder { color: #3D3A36; }
+    .input:disabled { color: #3D3A36; opacity: 0.6; }
+    select.input option { background: #111214; }
+
+    /* ── BUTTONS ────────────────────────────────────────────────── */
+    .btn-primary {
+      background: #1DB87E;
+      color: #0A0A0A;
+      font-weight: 700;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: all 0.15s;
+      cursor: pointer;
+      border: none;
+      display: inline-block;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary:hover  { background: #22D490; }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .btn-gold {
+      background: transparent;
+      color: #C9A96E;
+      border: 1px solid rgba(201,169,110,0.4);
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.15s;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-gold:hover  { background: rgba(201,169,110,0.1); border-color: #C9A96E; }
+    .btn-gold:active { transform: scale(0.97); }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.04);
+      color: #9A9590;
+      font-weight: 400;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.15s;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-ghost:hover  { color: #F5F1EC; background: rgba(255,255,255,0.07); }
+    .btn-ghost:active { transform: scale(0.97); }
+
+    .btn-danger {
+      background: transparent;
+      color: #E05555;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .btn-danger:hover { background: rgba(224,85,85,0.1); }
+
+    /* ── BADGES ─────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center;
+      border-radius: 999px; padding: 2px 10px;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .badge-green  { background: rgba(29,184,126,0.12); color: #1DB87E; }
+    .badge-gold   { background: rgba(201,169,110,0.12); color: #C9A96E; }
+    .badge-red    { background: rgba(224,85,85,0.12);   color: #E05555; }
+    .badge-muted  { background: rgba(255,255,255,0.05); color: #9A9590; }
+
+    /* ── LABELS / HEADINGS ──────────────────────────────────────── */
+    .section-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: #4A4540;
+    }
+    .gold-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: #8A7248;
+    }
+    .page-title {
+      font-size: 18px; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      color: #F5F1EC;
+    }
+    .num-display {
+      font-family: 'Engravers Gothic BT','Engravers Gothic','Century Gothic',monospace;
+      font-weight: 700; letter-spacing: 0.04em;
+    }
+
+    /* ── LIST ROWS ──────────────────────────────────────────────── */
+    .list-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.12s;
+    }
+    .list-row:last-child { border-bottom: none; }
+    .list-row:active { background: rgba(255,255,255,0.02); }
+
+    /* ── STATUS DOT ─────────────────────────────────────────────── */
+    .dot-green { width:8px; height:8px; border-radius:50%; background:#1DB87E; display:inline-block;
+                 box-shadow: 0 0 6px rgba(29,184,126,0.6); }
+    .dot-gold  { width:8px; height:8px; border-radius:50%; background:#C9A96E; display:inline-block; }
+    .dot-red   { width:8px; height:8px; border-radius:50%; background:#E05555; display:inline-block; }
+    .dot-muted { width:8px; height:8px; border-radius:50%; background:#3D3A36; display:inline-block; }
+
+    /* ── GOLD DIVIDER ───────────────────────────────────────────── */
+    .divider-gold {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(201,169,110,0.3) 0%, transparent 100%);
+    }
+
+    /* ── ALERT ──────────────────────────────────────────────────── */
+    .alert-error {
+      background: rgba(224,85,85,0.08);
+      border: 1px solid rgba(224,85,85,0.25);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #E05555;
+      font-size: 13px;
+    }
+    .alert-success {
+      background: rgba(29,184,126,0.08);
+      border: 1px solid rgba(29,184,126,0.25);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #1DB87E;
+      font-size: 13px;
+    }
+
+    /* Desktop top nav links */
+    .top-nav-link {
+      color: #4A4540; padding: 6px 12px; border-radius: 8px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      transition: all 0.15s; white-space: nowrap; text-decoration: none;
+    }
+    .top-nav-link:hover  { color: #F5F1EC; background: rgba(255,255,255,0.05); }
+    .top-nav-link.active { color: #C9A96E; background: rgba(201,169,110,0.08); }
+
+    /* ── CHECKBOX & RADIO ───────────────────────────────────────── */
+    input[type="checkbox"],
+    input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 5px;
+      background: #0D0D0D;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: border-color 0.15s, background 0.15s;
+      vertical-align: middle;
+    }
+    input[type="radio"] { border-radius: 50%; }
+
+    input[type="checkbox"]:checked,
+    input[type="radio"]:checked {
+      background: #1DB87E;
+      border-color: #1DB87E;
+    }
+    /* Custom checkmark */
+    input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px; top: 1px;
+      width: 6px; height: 10px;
+      border: 2px solid #0A0A0A;
+      border-top: none; border-left: none;
+      transform: rotate(45deg);
+    }
+    /* Radio dot */
+    input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #0A0A0A;
+    }
+    input[type="checkbox"]:focus,
+    input[type="radio"]:focus {
+      outline: none;
+      border-color: #C9A96E;
+      box-shadow: 0 0 0 2px rgba(201,169,110,0.15);
+    }
+    input[type="checkbox"]:hover:not(:checked),
+    input[type="radio"]:hover:not(:checked) {
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    /* ── SELECT ─────────────────────────────────────────────────── */
+    select.input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A4540' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 38px;
+      cursor: pointer;
+    }
+    select.input:focus {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23C9A96E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    }
+
+    /* ── NUMBER INPUT (hide spinners) ───────────────────────────── */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    /* ── DATE & TIME INPUT ──────────────────────────────────────── */
+    input[type="date"],
+    input[type="time"] {
+      color-scheme: dark;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5) sepia(1) saturate(2) hue-rotate(10deg);
+      opacity: 0.5;
+      cursor: pointer;
+    }
+    /* date-input text fields: monospace digits look nicer */
+    input.date-input, input.date-display { letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+    /* date-wrap: text field + hidden picker + calendar icon */
+    .date-wrap { position: relative; }
+    .date-wrap .date-real {
+      position: absolute; right: 0; top: 0; width: 36px; height: 100%;
+      opacity: 0; pointer-events: none; border: none; padding: 0;
+    }
+    .date-wrap .date-cal {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; padding: 4px; cursor: pointer;
+      color: #4A4540; line-height: 1; display: flex; align-items: center;
+      transition: color 0.15s;
+    }
+    .date-wrap .date-cal:hover { color: #C9A96E; }
+    .date-wrap .date-display { padding-right: 36px; }
+
+    /* ── TEXTAREA ───────────────────────────────────────────────── */
+    textarea.input {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.6;
+    }
+
+    /* ── FIELDSET / LEGEND ──────────────────────────────────────── */
+    fieldset {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    legend {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: #4A4540;
+      padding: 0 8px;
+    }
+
+    /* ── RANGE ──────────────────────────────────────────────────── */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      background: #C9A96E;
+      border-radius: 50%;
+      border: none;
+      box-shadow: 0 0 6px rgba(201,169,110,0.4);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      background: #C9A96E;
+      border-radius: 50%;
+      border: none;
+    }
+
+    /* ── LABEL (checkbox/radio row) ─────────────────────────────── */
+    .check-row {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      background: #0D0D0D;
+      transition: border-color 0.15s, background 0.15s;
+      font-size: 12px; color: #9A9590; letter-spacing: 0.04em;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .check-row:hover { border-color: rgba(255,255,255,0.14); background: #111214; }
+    .check-row:has(input:checked) {
+      border-color: rgba(29,184,126,0.35);
+      background: rgba(29,184,126,0.04);
+      color: #F5F1EC;
+    }
+    /* Red variant for "block" toggles */
+    .check-row-danger:has(input:checked) {
+      border-color: rgba(224,85,85,0.35);
+      background: rgba(224,85,85,0.04);
+      color: #E05555;
+    }
+    .check-row-danger:has(input:checked) input[type="checkbox"] {
+      background: #E05555;
+      border-color: #E05555;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOP HEADER
+     ══════════════════════════════════════════════════════════ -->
+<header class="top-bar">
+  <div class="flex items-center justify-between px-4 sm:px-6" style="height:56px;">
+
+    <!-- Logo -->
+    <a href="/admin/profile" class="flex items-center gap-3 shrink-0" style="text-decoration:none;">
+      <img src="/static/logo.svg" alt="ULTRA" width="36" height="36"
+           style="border-radius:50%;flex-shrink:0;display:block;"/>
+      <div style="line-height:1.15;">
+        <div style="color:#C9A96E;font-size:12px;font-weight:700;letter-spacing:0.22em;">ULTRA</div>
+        <div style="color:#4A4540;font-size:8px;letter-spacing:0.18em;margin-top:1px;">FENCING CLUB</div>
+      </div>
+    </a>
+
+    <!-- Desktop nav (hidden on mobile) -->
+    {% if auth_user %}
+    {% set role = auth_user.role.value %}
+    {% set is_instructor = role in ("instructor", "admin") %}
+    {% set is_admin = role == "admin" %}
+    {% set pc = request.state.pending_count if request.state is defined and request.state.pending_count is defined else 0 %}
+    <nav class="hidden md:flex items-center gap-0.5 overflow-x-auto">
+      {# 1. Профиль — все #}
+      <a href="/admin/profile" class="top-nav-link {% if request.url.path == '/admin/profile' %}active{% endif %}">Профиль</a>
+      {# 2. Рейтинг — все #}
+      <a href="/admin/rating" class="top-nav-link {% if request.url.path == '/admin/rating' or request.url.path == '/admin/leaderboard' %}active{% endif %}">Рейтинг</a>
+      {# 3. Бои и Табата — все #}
+      <a href="/admin/match" class="top-nav-link {% if request.url.path.startswith('/admin/match') or request.url.path.startswith('/admin/rating') or request.url.path.startswith('/admin/tabata') %}active{% endif %}">Бои и Табата</a>
+      {# 3. Расписание — только admin #}
+      {% if is_admin %}
+      <a href="/admin/schedule" class="top-nav-link {% if request.url.path.startswith('/admin/schedule') %}active{% endif %}">Расписание</a>
+      {% endif %}
+      {# 4. Посещаемость — instructor+ #}
+      {% if is_instructor %}
+      <a href="/admin/attendance" class="top-nav-link {% if request.url.path.startswith('/admin/attendance') %}active{% endif %}">Посещаемость</a>
+      {# 5. Финансы — instructor+ #}
+      <a href="/admin/payment" class="top-nav-link {% if request.url.path.startswith('/admin/payment') %}active{% endif %}">Финансы</a>
+      {# 6. Новые заявки — instructor+ #}
+      <a href="/admin/users/pending"
+         class="top-nav-link {% if request.url.path.startswith('/admin/users/pending') %}active{% endif %}"
+         style="position:relative;">
+        Новые заявки
+        {% if pc > 0 %}
+        <span style="position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;
+                     background:#E05555;color:#fff;font-size:9px;font-weight:700;
+                     border-radius:8px;padding:0 3px;display:inline-flex;
+                     align-items:center;justify-content:center;line-height:1;">{{ pc }}</span>
+        {% endif %}
+      </a>
+      {% endif %}
+      {# 7. Роли — только admin #}
+      {% if is_admin %}
+      <a href="/admin/users" class="top-nav-link {% if request.url.path == '/admin/users' %}active{% endif %}">Роли</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+
+    <!-- Right side -->
+    <div class="flex items-center gap-2 shrink-0">
+      {% if auth_user %}
+      <form method="post" action="/admin/auth/logout">
+        <button style="color:#4A4540;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+                       background:none;border:none;cursor:pointer;padding:6px 8px;transition:color 0.15s;"
+                onmouseover="this.style.color='#F5F1EC'" onmouseout="this.style.color='#4A4540'">
+          Выйти
+        </button>
+      </form>
+      {% endif %}
+    </div>
+
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CONTENT
+     ══════════════════════════════════════════════════════════ -->
+<main class="mx-auto max-w-3xl px-4 sm:px-6 py-6" style="padding-bottom:96px;">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MOBILE BOTTOM NAV
+     ══════════════════════════════════════════════════════════ -->
+{% if auth_user %}
+{% set p = request.url.path %}
+{% set role = auth_user.role.value %}
+{% set is_instructor = role in ("instructor", "admin") %}
+{% set is_admin = role == "admin" %}
+{% set pc = request.state.pending_count if request.state is defined and request.state.pending_count is defined else 0 %}
+
+<nav class="bottom-nav md:hidden">
+  <div class="flex" style="height:60px;">
+
+    {# 1. Профиль — все #}
+    <a href="/admin/profile" class="bn-item {% if p.startswith('/admin/profile') %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Профиль
+    </a>
+
+    {# 2. Рейтинг — все #}
+    <a href="/admin/rating" class="bn-item {% if p == '/admin/rating' or p == '/admin/leaderboard' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      Рейтинг
+    </a>
+
+    {# 3. Бои и Табата — все #}
+    <a href="/admin/match" class="bn-item {% if p.startswith('/admin/match') or p.startswith('/admin/rating') or p.startswith('/admin/tabata') %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
+      Бои
+    </a>
+
+    {# 3. Посещаемость — instructor+ #}
+    {% if is_instructor %}
+    <a href="/admin/attendance" class="bn-item {% if p.startswith('/admin/attendance') %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Посещаемость
+    </a>
+
+    {# 4. Финансы — instructor+ #}
+    <a href="/admin/payment" class="bn-item {% if p.startswith('/admin/payment') %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Финансы
+    </a>
+    {% endif %}
+
+    {# 5. Ещё — все (drawer содержит остальное) #}
+    {% set drawer_active = p.startswith('/admin/schedule') or p.startswith('/admin/users') %}
+    <button class="bn-item {% if drawer_active %}active{% endif %}"
+            onclick="toggleDrawer()" id="more-btn"
+            style="background:none;border:none;cursor:pointer;flex:1;position:relative;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
+      Ещё
+      {% if is_instructor and pc > 0 %}
+      <span style="position:absolute;top:6px;right:6px;min-width:14px;height:14px;
+                   background:#E05555;color:#fff;font-size:8px;font-weight:700;
+                   border-radius:7px;padding:0 2px;display:inline-flex;
+                   align-items:center;justify-content:center;line-height:1;">{{ pc }}</span>
+      {% endif %}
+    </button>
+
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="drawer-handle"></div>
+
+  {# Бои и Табата в drawer (подменю) — все роли #}
+  <div class="drawer-section">Бои и Табата</div>
+  <a href="/admin/match" class="drawer-item {% if p.startswith('/admin/match') %}active{% endif %}" onclick="closeDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
+    Матч
+  </a>
+  <a href="/admin/rating" class="drawer-item {% if p.startswith('/admin/rating') %}active{% endif %}" onclick="closeDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+    Рейтинг
+  </a>
+  <a href="/admin/tabata" class="drawer-item {% if p.startswith('/admin/tabata') %}active{% endif %}" onclick="closeDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Табата
+  </a>
+
+  {% if is_admin %}
+  <div class="drawer-section" style="margin-top:8px;">Управление</div>
+
+  {# Расписание — только admin #}
+  <a href="/admin/schedule" class="drawer-item {% if p.startswith('/admin/schedule') %}active{% endif %}" onclick="closeDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Расписание
+  </a>
+  {% endif %}
+
+  {% if is_instructor %}
+  {# Новые заявки с бейджем — instructor+ #}
+  <a href="/admin/users/pending" class="drawer-item {% if p.startswith('/admin/users/pending') %}active{% endif %}"
+     onclick="closeDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+    Новые заявки
+    {% if pc > 0 %}
+    <span style="margin-left:auto;min-width:20px;height:20px;background:#E05555;color:#fff;
+                 font-size:10px;font-weight:700;border-radius:10px;padding:0 5px;
+                 display:inline-flex;align-items:center;justify-content:center;">{{ pc }}</span>
+    {% endif %}
+  </a>
+  {% endif %}
+
+  {% if is_admin %}
+  {# Роли — только admin #}
+  <a href="/admin/users" class="drawer-item {% if p == '/admin/users' %}active{% endif %}" onclick="closeDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Роли
+  </a>
+  {% endif %}
+
+</div>
+
+<script>
+  function toggleDrawer() {
+    document.getElementById('drawer').classList.toggle('open');
+    document.getElementById('drawer-overlay').classList.toggle('open');
+  }
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawer-overlay').classList.remove('open');
+  }
+</script>
+{% endif %}
+
+<script>
+/* ── Date inputs: DD/MM/YYYY + native calendar picker ────────────────────
+   Structure (use .date-wrap helper or standalone .date-input):
+
+   <div class="date-wrap">
+     <input type="text" class="date-display" placeholder="ДД/ММ/ГГГГ" …/>
+     <input type="date"  class="date-real"   name="…" [value="YYYY-MM-DD"]/>
+   </div>
+
+   - Text field shows DD/MM/YYYY; calendar icon opens the native date picker
+   - Picker selection → updates text field
+   - Manual typing   → updates hidden date input
+   - Standalone .date-input: no picker, on submit converts DD/MM/YYYY→ISO
+──────────────────────────────────────────────────────────────────────── */
+function fmtDate(el) {
+  let v = el.value.replace(/\D/g, '').slice(0, 8);
+  if (v.length >= 5) v = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
+  else if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+  el.value = v;
+}
+function _dmy2iso(dmy) {
+  const p = dmy.split('/');
+  if (p.length === 3 && p[2].length === 4)
+    return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+  return dmy;
+}
+function _iso2dmy(iso) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(iso)
+    ? `${iso.slice(8)}/${iso.slice(5,7)}/${iso.slice(0,4)}` : iso;
+}
+function openDatePicker(btn) {
+  const real = btn.closest('.date-wrap').querySelector('.date-real');
+  if (real) { try { real.showPicker(); } catch(e) { real.click(); } }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Sync hidden date → display on load
+  document.querySelectorAll('.date-wrap').forEach(wrap => {
+    const real = wrap.querySelector('.date-real');
+    const disp = wrap.querySelector('.date-display');
+    if (real && disp && real.value) disp.value = _iso2dmy(real.value);
+  });
+
+  // Picker change → update display
+  document.addEventListener('change', function(e) {
+    if (!e.target.classList.contains('date-real')) return;
+    const disp = e.target.closest('.date-wrap')?.querySelector('.date-display');
+    if (disp) disp.value = _iso2dmy(e.target.value);
+  });
+
+  // Display typing → update hidden real input
+  document.addEventListener('input', function(e) {
+    if (!e.target.classList.contains('date-display')) return;
+    const real = e.target.closest('.date-wrap')?.querySelector('.date-real');
+    if (real) real.value = _dmy2iso(e.target.value);
+  });
+
+  // Standalone .date-input (no .date-wrap): convert on submit
+  document.querySelectorAll('input.date-input').forEach(el => {
+    if (el.value) el.value = _iso2dmy(el.value);
+    el.closest('form')?.addEventListener('submit', function() {
+      el.value = _dmy2iso(el.value);
+    }, { capture: true });
+  });
+});
+</script>
+
+</body>
+</html>

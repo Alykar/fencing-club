@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Вступить в клуб — ULTRA Fencing Club{% endblock %}
+{% block content %}
+
+<div style="max-width:440px;margin:0 auto;padding:32px 0;">
+
+  <div style="text-align:center;margin-bottom:28px;">
+    <img src="/static/logo.svg" alt="ULTRA Fencing Club"
+         style="width:64px;height:64px;border-radius:50%;margin:0 auto 12px;display:block;
+                box-shadow:0 0 24px rgba(201,169,110,0.15);"/>
+    <div style="color:#C9A96E;font-size:12px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;">
+      ULTRA FENCING CLUB
+    </div>
+    <div style="color:#4A4540;font-size:9px;letter-spacing:0.16em;margin-top:6px;text-transform:uppercase;">
+      Подача заявки на вступление
+    </div>
+  </div>
+
+  <div class="card card-accent" style="border-radius:20px;">
+    <div style="padding:28px 28px 0;">
+      <h1 style="color:#F5F1EC;font-size:14px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:20px;">
+        Вступить в клуб
+      </h1>
+
+      {% if error %}
+      <div class="alert-error" style="margin-bottom:20px;">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" action="/admin/auth/register" style="display:flex;flex-direction:column;gap:14px;"
+            novalidate>
+
+        <!-- ФИО -->
+        <div>
+          <div class="section-label" style="margin-bottom:8px;">ФИО *</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input type="text" name="last_name" required class="input" placeholder="Фамилия"
+                   autocomplete="family-name"/>
+            <input type="text" name="first_name" required class="input" placeholder="Имя"
+                   autocomplete="given-name"/>
+            <input type="text" name="patronymic" class="input" placeholder="Отчество (необязательно)"
+                   autocomplete="additional-name"/>
+          </div>
+        </div>
+
+        <!-- Контакты -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Телефон *</label>
+            <input type="tel" name="tel" required class="input" placeholder="+7 999 000-00-00"
+                   autocomplete="tel"
+                   oninvalid="this.setCustomValidity('Введите номер телефона')"
+                   oninput="this.setCustomValidity('')"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Email *</label>
+            <input type="email" name="email" required class="input" placeholder="mail@example.com"
+                   autocomplete="email"
+                   oninvalid="this.setCustomValidity('Введите корректный email')"
+                   oninput="this.setCustomValidity('')"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Telegram</label>
+            <input type="text" name="tg" class="input" placeholder="@username"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">ВКонтакте</label>
+            <input type="text" name="vk" class="input" placeholder="vk.com/id"/>
+          </div>
+        </div>
+
+        <!-- Откуда узнали -->
+        <div>
+          <label class="section-label" style="display:block;margin-bottom:7px;">Откуда узнали о нас? *</label>
+          <select name="referral_source" id="ref_src" required class="input"
+            onchange="document.getElementById('friend_block').style.display = this.value === 'friend' ? 'flex' : 'none'">
+            {% for src in referral_sources %}
+            <option value="{{ src.value }}">{{ src.value }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div id="friend_block" style="display:none;flex-direction:column;gap:4px;">
+          <label class="section-label" style="display:block;margin-bottom:7px;">ФИО друга</label>
+          <input type="text" name="friend_name" class="input" placeholder="Иванов Иван Иванович"/>
+        </div>
+
+        <!-- Пароль -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Пароль *</label>
+            <input type="password" name="password" required minlength="8" class="input"
+                   placeholder="••••••••" autocomplete="new-password"
+                   oninvalid="this.setCustomValidity('Минимум 8 символов')"
+                   oninput="this.setCustomValidity('')"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Повтор *</label>
+            <input type="password" name="password_confirm" required class="input"
+                   placeholder="••••••••" autocomplete="new-password"/>
+          </div>
+        </div>
+
+        <div style="padding-top:4px;">
+          <button type="submit" class="btn-primary" style="width:100%;text-align:center;padding:14px;">
+            Подать заявку
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div style="padding:20px 28px 28px;">
+      <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
+      <p style="text-align:center;font-size:11px;color:#4A4540;letter-spacing:0.06em;">
+        Уже подавали заявку?
+        <a href="/admin/auth/login" style="color:#1DB87E;font-weight:700;text-decoration:none;margin-left:4px;">
+          Войти →
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

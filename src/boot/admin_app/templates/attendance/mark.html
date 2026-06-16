@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Отметка — ULTRA{% endblock %}
+{% block content %}
+
+<div style="display:flex;flex-direction:column;gap:14px;">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div>
+      <a href="/admin/attendance"
+         style="color:#4A4540;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;
+                display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;transition:color 0.15s;"
+         onmouseover="this.style.color='#9A9590'" onmouseout="this.style.color='#4A4540'">
+        ← Назад
+      </a>
+      <div class="page-title">Отметки</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="card" style="border-radius:12px;overflow:visible;">
+    <div style="padding:14px 16px;">
+      <form method="get">
+        <input type="text" name="q" value="{{ query }}" class="input" placeholder="Поиск участника…"/>
+      </form>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="card">
+    {% for user in users %}
+    {% set attended = user.id in attended_ids %}
+    {% set paid = payments_by_user.get(user.id, False) %}
+    <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;
+                border-bottom:1px solid rgba(255,255,255,0.04);
+                {% if attended %}background:rgba(29,184,126,0.05);{% endif %}">
+
+      <!-- Имя + статус оплаты -->
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:{% if attended %}600{% else %}400{% endif %};
+                    color:{% if attended %}#F5F1EC{% else %}#9A9590{% endif %};
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          {{ user.name }}
+        </div>
+        <div style="margin-top:3px;">
+          {% if paid %}
+          <span style="font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+                       color:#1DB87E;">● оплачено</span>
+          {% else %}
+          <span style="font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+                       color:#4A4540;">● не оплачено</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Переключатель Был / Нет -->
+      <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);
+                  flex-shrink:0;">
+        {# "Был" — всегда mark; активен когда attended=True #}
+        <form method="post" action="/admin/attendance/{{ session_id }}/mark/{{ user.id }}">
+          <button type="submit"
+                  style="padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:0.06em;
+                         text-transform:uppercase;border:none;cursor:pointer;transition:background 0.15s;
+                         {% if attended %}background:#1DB87E;color:#0A0A0A;
+                         {% else %}background:rgba(255,255,255,0.04);color:#4A4540;{% endif %}">
+            Был
+          </button>
+        </form>
+        <div style="width:1px;background:rgba(255,255,255,0.08);flex-shrink:0;"></div>
+        {# "Нет" — всегда unmark; активен когда attended=False #}
+        <form method="post" action="/admin/attendance/{{ session_id }}/unmark/{{ user.id }}">
+          <button type="submit"
+                  style="padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:0.06em;
+                         text-transform:uppercase;border:none;cursor:pointer;transition:background 0.15s;
+                         {% if not attended %}background:rgba(229,80,80,0.15);color:#E05252;
+                         {% else %}background:rgba(255,255,255,0.04);color:#4A4540;{% endif %}">
+            Нет
+          </button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div style="padding:48px 20px;text-align:center;color:#4A4540;font-size:11px;letter-spacing:0.1em;">
+      УЧАСТНИКИ НЕ НАЙДЕНЫ
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

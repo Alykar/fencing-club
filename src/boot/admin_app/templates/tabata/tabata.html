@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% block title %}Табата — ULTRA{% endblock %}
+{% block content %}
+<div style="max-width:400px;margin:0 auto;" id="tab-app">
+
+  <!-- ════════════════════ SETUP SCREEN ════════════════════ -->
+  <div id="t-setup">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div class="gold-label">Табата таймер</div>
+    </div>
+
+    <div class="card card-accent" style="border-radius:20px;">
+      <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Работа (сек)</label>
+            <input id="cfg-work" type="number" min="5" value="20" class="input"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Отдых (сек)</label>
+            <input id="cfg-rest" type="number" min="5" value="10" class="input"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Упражнений</label>
+            <input id="cfg-exercises" type="number" min="1" value="8" class="input"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Кругов</label>
+            <input id="cfg-rounds" type="number" min="1" value="3" class="input"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Перерыв (сек)</label>
+            <input id="cfg-break" type="number" min="0" value="60" class="input"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Старт (сек)</label>
+            <input id="cfg-startdelay" type="number" min="3" max="10" value="5" class="input"/>
+          </div>
+        </div>
+        <button onclick="startTabata()" class="btn-primary"
+                style="padding:14px;text-align:center;font-size:13px;">
+          Запустить
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ COUNTDOWN SCREEN ════════════════════ -->
+  <div id="t-countdown" style="display:none;text-align:center;padding:32px 0;">
+    <div class="section-label" style="margin-bottom:24px;letter-spacing:0.18em;">Приготовьтесь</div>
+    <div id="cd-num" class="num-display"
+         style="font-size:128px;font-weight:700;line-height:1;color:#C9A96E;
+                transition:transform 0.15s,opacity 0.15s;"></div>
+  </div>
+
+  <!-- ════════════════════ TIMER SCREEN ════════════════════ -->
+  <div id="t-timer" style="display:none;flex-direction:column;gap:14px;">
+
+    <!-- Phase label -->
+    <div id="t-phase-label" class="page-title" style="text-align:center;font-size:16px;
+         letter-spacing:0.28em;transition:color 0.25s;margin-bottom:-4px;"></div>
+
+    <!-- Big timer -->
+    <div style="text-align:center;">
+      <div id="t-time" class="num-display"
+           style="font-size:100px;font-weight:700;line-height:1;color:#F5F1EC;transition:color 0.25s;"></div>
+    </div>
+
+    <!-- Progress ring / bar -->
+    <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+      <div id="t-bar" style="height:100%;width:100%;border-radius:3px;transition:width 0.5s,background 0.25s;"></div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px;">
+      <div class="card" style="padding:12px;text-align:center;border-radius:12px;">
+        <div class="section-label" style="font-size:9px;margin-bottom:4px;">Упражнение</div>
+        <div id="t-ex" class="num-display" style="font-size:22px;font-weight:700;color:#F5F1EC;"></div>
+      </div>
+      <div class="card" style="padding:12px;text-align:center;border-radius:12px;">
+        <div class="section-label" style="font-size:9px;margin-bottom:4px;">Круг</div>
+        <div id="t-round" class="num-display" style="font-size:22px;font-weight:700;color:#F5F1EC;"></div>
+      </div>
+      <div class="card" style="padding:12px;text-align:center;border-radius:12px;">
+        <div class="section-label" style="font-size:9px;margin-bottom:4px;">Всего</div>
+        <div id="t-total" class="num-display" style="font-size:16px;font-weight:600;color:#9A9590;line-height:1.3;margin-top:2px;"></div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button onclick="togglePause()" id="t-pause-btn" class="btn-gold"
+              style="flex:1;text-align:center;padding:13px;">Пауза</button>
+      <button onclick="stopTabata()" class="btn-ghost" style="padding:13px 18px;">Стоп</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════ DONE SCREEN ════════════════════ -->
+  <div id="t-done" style="display:none;text-align:center;padding:40px 0;">
+    <div class="card card-accent" style="border-radius:20px;">
+      <div class="card-body">
+        <div class="gold-label" style="font-size:18px;margin-bottom:8px;">ГОТОВО!</div>
+        <div style="color:#4A4540;font-size:11px;letter-spacing:0.1em;margin-bottom:24px;">
+          Тренировка завершена
+        </div>
+        <button onclick="showSetup()" class="btn-primary" style="padding:12px 32px;">Ещё раз</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ──────────────────── Web Audio beeps ──────────────────── */
+const AC = typeof AudioContext !== 'undefined' ? new AudioContext() :
+           typeof webkitAudioContext !== 'undefined' ? new webkitAudioContext() : null;
+
+function beep(freq, dur, vol) {
+  if (!AC) return;
+  try {
+    const o = AC.createOscillator();
+    const g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, AC.currentTime);
+    g.gain.setValueAtTime(vol || 0.6, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + dur);
+    o.start(); o.stop(AC.currentTime + dur);
+  } catch(e) {}
+}
+
+function resumeAC() { if (AC && AC.state === 'suspended') AC.resume(); }
+document.addEventListener('touchstart', resumeAC, { once: true });
+document.addEventListener('click', resumeAC, { once: true });
+
+function beepWork() {
+  // Двойной высокий — "начало работы"
+  beep(880, 0.12); setTimeout(() => beep(1100, 0.25), 120);
+}
+function beepRest() {
+  // Низкий длинный — "отдыхай"
+  beep(440, 0.55);
+}
+function beepBreak() {
+  // Три нисходящих — "перерыв между кругами"
+  beep(600, 0.2); setTimeout(() => beep(480, 0.2), 200); setTimeout(() => beep(380, 0.5), 400);
+}
+function beepDone()  { beep(659, 0.2); setTimeout(() => beep(784, 0.2), 180); setTimeout(() => beep(1047, 0.5), 360); }
+function beepCount() { beep(660, 0.08, 0.35); }   // тихий тик — каждая из 5 последних секунд
+function beepCountGo(){ beep(1100, 0.1); setTimeout(() => beep(1100, 0.35), 100); } // старт
+
+/* ──────────────────── State ──────────────────── */
+let cfg = {};
+let phase, exIdx, roundIdx;
+let remaining, totalSec, elapsedSec, paused;
+let interval;
+
+/* ──────────────────── Screens ──────────────────── */
+function showSetup()    { hide('t-countdown','t-timer','t-done'); show('t-setup'); clearInterval(interval); }
+function showCountdown(){ hide('t-setup','t-timer','t-done');
+                          document.getElementById('t-countdown').style.display = 'block'; }
+function showTimer()    { hide('t-setup','t-countdown','t-done');
+                          document.getElementById('t-timer').style.display = 'flex';
+                          document.getElementById('t-timer').style.flexDirection = 'column'; }
+function showDone()     { hide('t-setup','t-countdown','t-timer');
+                          document.getElementById('t-done').style.display = 'block'; beepDone(); }
+function hide(...ids)   { ids.forEach(id => document.getElementById(id).style.display = 'none'); }
+function show(id)       { document.getElementById(id).style.display = 'block'; }
+
+/* ──────────────────── Settings persistence ──────────────────── */
+const STORAGE_KEY = 'tabata_cfg_{{ auth_user.id }}';
+
+const FIELDS = [
+  { id: 'cfg-work',       key: 'work',       def: 20 },
+  { id: 'cfg-rest',       key: 'rest',       def: 10 },
+  { id: 'cfg-exercises',  key: 'exercises',  def: 8  },
+  { id: 'cfg-rounds',     key: 'rounds',     def: 3  },
+  { id: 'cfg-break',      key: 'brk',        def: 60 },
+  { id: 'cfg-startdelay', key: 'startDelay', def: 5  },
+];
+
+function saveSettings(c) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); } catch(e) {}
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    FIELDS.forEach(f => {
+      const val = saved[f.key];
+      if (val !== undefined) document.getElementById(f.id).value = val;
+    });
+  } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', loadSettings);
+
+/* ──────────────────── Start ──────────────────── */
+function startTabata() {
+  cfg = {
+    work:       Math.max(5, parseInt(document.getElementById('cfg-work').value) || 20),
+    rest:       Math.max(5, parseInt(document.getElementById('cfg-rest').value) || 10),
+    exercises:  Math.max(1, parseInt(document.getElementById('cfg-exercises').value) || 8),
+    rounds:     Math.max(1, parseInt(document.getElementById('cfg-rounds').value) || 3),
+    brk:        parseInt(document.getElementById('cfg-break').value) || 0,
+    startDelay: Math.max(3, parseInt(document.getElementById('cfg-startdelay').value) || 5),
+  };
+  saveSettings(cfg);
+  clearInterval(interval);
+  runCountdown(cfg.startDelay);
+}
+
+function runCountdown(n) {
+  showCountdown();
+  document.getElementById('cd-num').textContent = n;
+  document.getElementById('cd-num').style.opacity = '1';
+  document.getElementById('cd-num').style.transform = 'scale(1.05)';
+  beepCount();
+  if (n <= 0) { beepCountGo(); beginTimer(); return; }
+  setTimeout(() => runCountdown(n - 1), 1000);
+}
+
+function beginTimer() {
+  exIdx = 1; roundIdx = 1; paused = false;
+  const totalSessions = cfg.rounds * cfg.exercises;
+  let brks = cfg.rounds - 1;
+  totalSec = totalSessions * (cfg.work + cfg.rest) + brks * cfg.brk;
+  elapsedSec = 0;
+  startPhase('WORK');
+}
+
+function startPhase(p) {
+  phase = p;
+  let phaseSec = p === 'WORK' ? cfg.work : p === 'REST' ? cfg.rest : cfg.brk;
+  remaining = phaseSec;
+  clearInterval(interval);
+  renderTimer();
+  if (p === 'WORK') beepWork();
+  else if (p === 'REST') beepRest();
+  else beepBreak();
+  interval = setInterval(tick, 1000);
+}
+
+function tick() {
+  if (paused) return;
+  remaining--;
+  elapsedSec++;
+  renderTimer();
+  if (remaining <= 0) {
+    nextPhase();
+  } else if (remaining <= 5) {
+    beepCount();
+  }
+}
+
+function nextPhase() {
+  clearInterval(interval);
+  if (phase === 'WORK') {
+    startPhase('REST');
+    return;
+  }
+  if (phase === 'REST') {
+    exIdx++;
+    if (exIdx > cfg.exercises) {
+      roundIdx++;
+      if (roundIdx > cfg.rounds) { showDone(); return; }
+      exIdx = 1;
+      if (cfg.brk > 0) { startPhase('BREAK'); return; }
+    }
+    startPhase('WORK');
+    return;
+  }
+  // BREAK phase ended
+  startPhase('WORK');
+}
+
+function renderTimer() {
+  const m = Math.floor(remaining / 60), s = remaining % 60;
+  const timeStr = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const el = document.getElementById('t-time');
+  const pl = document.getElementById('t-phase-label');
+  const bar = document.getElementById('t-bar');
+
+  let phaseLabel, fgColor, barColor, phaseSec;
+  if (phase === 'WORK')  { phaseLabel='РАБОТА';  fgColor='#1DB87E'; barColor='#1DB87E'; phaseSec=cfg.work; }
+  else if (phase === 'REST') { phaseLabel='ОТДЫХ'; fgColor='#C9A96E'; barColor='#C9A96E'; phaseSec=cfg.rest; }
+  else { phaseLabel='ПЕРЕРЫВ'; fgColor='#4A7E9A'; barColor='#4A7E9A'; phaseSec=cfg.brk; }
+
+  el.textContent = timeStr;
+  el.style.color = remaining <= 3 ? '#E05555' : fgColor;
+  pl.textContent = phaseLabel;
+  pl.style.color = fgColor;
+  bar.style.width = (remaining / phaseSec * 100) + '%';
+  bar.style.background = barColor;
+
+  showTimer();
+  document.getElementById('t-ex').textContent = exIdx + '/' + cfg.exercises;
+  document.getElementById('t-round').textContent = roundIdx + '/' + cfg.rounds;
+  const left = totalSec - elapsedSec;
+  const tm = Math.floor(left/60), ts = left%60;
+  document.getElementById('t-total').textContent = String(tm).padStart(2,'0') + ':' + String(ts).padStart(2,'0');
+}
+
+function togglePause() {
+  paused = !paused;
+  document.getElementById('t-pause-btn').textContent = paused ? 'Продолжить' : 'Пауза';
+}
+
+function stopTabata() { clearInterval(interval); showSetup(); }
+</script>
+{% endblock %}

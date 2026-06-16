@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Профиль — ULTRA{% endblock %}
+{% block content %}
+<div style="display:flex;flex-direction:column;gap:16px;">
+
+  <!-- ── Hero: ELO + доступ ──────────────────────────────────── -->
+  <div class="card-gold card-accent" style="border-radius:20px;">
+    <div style="padding:24px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+
+        <!-- ELO -->
+        <div>
+          <div class="gold-label" style="margin-bottom:10px;">Рейтинг ELO</div>
+          {% if rating %}
+            {% if rating.is_calibrated %}
+            <div class="num-display" style="color:#C9A96E;font-size:52px;line-height:1;">
+              {{ "%.0f" | format(rating.elo) }}
+            </div>
+            <div style="color:#4A4540;font-size:10px;letter-spacing:0.08em;margin-top:6px;">
+              {{ rating.matches_played }} БОЁВ СЫГРАНО
+            </div>
+            {% else %}
+            <div style="color:#F5F1EC;font-size:20px;font-weight:700;letter-spacing:0.06em;">
+              Калибровка
+            </div>
+            <div style="color:#4A4540;font-size:10px;letter-spacing:0.08em;margin-top:4px;">
+              {{ rating.matches_played }} / 10 БОЁВ
+            </div>
+            <div style="margin-top:12px;background:rgba(255,255,255,0.07);border-radius:999px;height:3px;width:140px;">
+              <div style="background:#C9A96E;border-radius:999px;height:3px;
+                          width:{{ [rating.matches_played * 10, 100] | min }}%;transition:width 0.4s;"></div>
+            </div>
+            {% endif %}
+          {% else %}
+          <div style="color:#4A4540;font-size:13px;letter-spacing:0.06em;">Боёв пока не было</div>
+          {% endif %}
+        </div>
+
+        <!-- Доступ в зал -->
+        <div style="text-align:right;flex-shrink:0;">
+          <div class="section-label" style="margin-bottom:10px;">Зал</div>
+          {% if user.has_hall_pass %}
+          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;">
+            <span class="dot-green"></span>
+            <span style="color:#1DB87E;font-size:11px;font-weight:700;letter-spacing:0.06em;">ОТКРЫТ</span>
+          </div>
+          {% else %}
+          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;">
+            <span class="dot-gold"></span>
+            <span style="color:#C9A96E;font-size:11px;font-weight:700;letter-spacing:0.06em;">ОЖИДАЕТ</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Расписание ──────────────────────────────────────────── -->
+  <div class="card">
+    <!-- Заголовок + навигация по неделям -->
+    <div class="card-section" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <div class="section-label" style="flex:1;">
+        {% set ws_m = week_start.month - 1 %}
+        {% set we_m = week_end.month - 1 %}
+        {% set months_ru = ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"] %}
+        {% if week_offset == 0 %}
+        Эта неделя
+        {% elif week_offset == 1 %}
+        Следующая неделя
+        {% else %}
+        {{ week_start.day }} {{ months_ru[ws_m] }} — {{ week_end.day }} {{ months_ru[we_m] }}
+        {% endif %}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        {% if week_offset > 0 %}
+        <a href="/admin/profile?week_offset={{ week_offset - 1 }}"
+           style="display:flex;align-items:center;justify-content:center;
+                  width:30px;height:30px;border-radius:8px;
+                  background:rgba(255,255,255,0.05);color:#9A9590;
+                  text-decoration:none;font-size:16px;transition:background 0.15s;"
+           onmouseover="this.style.background='rgba(201,169,110,0.12)';this.style.color='#C9A96E'"
+           onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='#9A9590'">‹</a>
+        {% else %}
+        <span style="display:flex;align-items:center;justify-content:center;
+                     width:30px;height:30px;border-radius:8px;
+                     background:rgba(255,255,255,0.02);color:#3D3A36;font-size:16px;cursor:default;">‹</span>
+        {% endif %}
+        <a href="/admin/profile?week_offset={{ week_offset + 1 }}"
+           style="display:flex;align-items:center;justify-content:center;
+                  width:30px;height:30px;border-radius:8px;
+                  background:rgba(255,255,255,0.05);color:#9A9590;
+                  text-decoration:none;font-size:16px;transition:background 0.15s;"
+           onmouseover="this.style.background='rgba(201,169,110,0.12)';this.style.color='#C9A96E'"
+           onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='#9A9590'">›</a>
+      </div>
+    </div>
+
+    <!-- Дни с тренировками (пустые не показываем) -->
+    {% set active_days = week_days | selectattr('sessions') | list %}
+    {% if active_days %}
+    {% for day in active_days %}
+    <div style="display:flex;align-items:stretch;
+                border-bottom:1px solid rgba(255,255,255,0.04);
+                {% if day.is_today %}background:rgba(201,169,110,0.07);
+                {% elif day.is_weekend %}background:rgba(29,184,126,0.05);
+                {% else %}background:rgba(255,255,255,0.02);{% endif %}">
+
+      <!-- Левая колонка: дата + день недели -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                  width:54px;min-width:54px;padding:12px 0;gap:3px;
+                  border-right:1px solid rgba(255,255,255,0.05);">
+        <span style="font-size:20px;font-weight:700;line-height:1;
+                     {% if day.is_today %}color:#C9A96E;{% elif day.is_weekend %}color:#1DB87E;{% else %}color:#F5F1EC;{% endif %}">
+          {{ day.date.day }}
+        </span>
+        <span style="font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+                     {% if day.is_today %}color:#C9A96E;{% elif day.is_weekend %}color:#1DB87E;{% else %}color:#4A4540;{% endif %}">
+          {{ day.weekday_short }}
+        </span>
+        {% if day.is_today %}
+        <span style="font-size:7px;letter-spacing:0.08em;text-transform:uppercase;color:#C9A96E;margin-top:1px;">СЕГОДНЯ</span>
+        {% endif %}
+      </div>
+
+      <!-- Правая колонка: тренировки -->
+      <div style="flex:1;display:flex;flex-direction:column;padding:8px 14px;gap:6px;justify-content:center;">
+        {% for s in day.sessions %}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;
+                    {% if not loop.first %}padding-top:6px;border-top:1px solid rgba(255,255,255,0.04);{% endif %}">
+          <div style="min-width:0;">
+            <div style="color:#F5F1EC;font-size:13px;font-weight:600;
+                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ s.title }}</div>
+            {% if s.description %}
+            <div style="color:#4A4540;font-size:10px;margin-top:1px;">{{ s.description }}</div>
+            {% endif %}
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div class="num-display" style="color:#9A9590;font-size:13px;font-weight:600;">
+              {{ s.starts_at.strftime('%H:%M') }}
+            </div>
+            <div style="color:#3D3A36;font-size:10px;margin-top:1px;">
+              {{ s.duration_minutes }} мин
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="padding:32px 20px;text-align:center;color:#3D3A36;font-size:10px;letter-spacing:0.1em;">
+      НА ЭТОЙ НЕДЕЛЕ ТРЕНИРОВОК НЕТ
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Личные данные ───────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-section">
+      <div class="section-label">Личные данные</div>
+    </div>
+    <div class="card-body">
+      <form method="post" action="/admin/profile" style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label class="section-label" style="display:block;margin-bottom:7px;">ФИО</label>
+          <input type="text" name="name" value="{{ user.name }}" class="input"/>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Телефон</label>
+            <input type="tel" name="tel" value="{{ user.tel }}" class="input"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Email</label>
+            <input type="email" value="{{ user.email }}" disabled class="input"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Telegram</label>
+            <input type="text" name="tg" value="{{ user.tg or '' }}" class="input" placeholder="@username"/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">ВКонтакте</label>
+            <input type="text" name="vk" value="{{ user.vk or '' }}" class="input" placeholder="vk.com/..."/>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" style="align-self:flex-start;">Сохранить</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Быстрый доступ ─────────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    {% for url, icon_path, label in [
+      ("/admin/match",  "M18 6L6 18M6 6l12 12", "Матч"),
+      ("/admin/rating", "M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M18 2H6v7a6 6 0 0 0 12 0V2Z", "Рейтинг"),
+      ("/admin/tabata", "", "Табата"),
+    ] %}
+    <a href="{{ url }}" style="text-decoration:none;">
+      <div class="card" style="border-radius:14px;padding:18px 12px;text-align:center;transition:border-color 0.15s;"
+           onmouseover="this.style.borderColor='rgba(201,169,110,0.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+        {% if label == "Табата" %}
+        <svg style="width:22px;height:22px;color:#9A9590;margin:0 auto 8px;" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        {% elif label == "Рейтинг" %}
+        <svg style="width:22px;height:22px;color:#9A9590;margin:0 auto 8px;" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="{{ icon_path }}"/>
+        </svg>
+        {% else %}
+        <svg style="width:22px;height:22px;color:#9A9590;margin:0 auto 8px;" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>
+        </svg>
+        {% endif %}
+        <div style="color:#9A9590;font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;">{{ label }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

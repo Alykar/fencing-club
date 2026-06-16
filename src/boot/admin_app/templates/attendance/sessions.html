@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Посещаемость — ULTRA{% endblock %}
+{% block content %}
+<div style="display:flex;flex-direction:column;gap:14px;">
+
+  <div class="page-title">Посещаемость</div>
+
+  <!-- Статистика за месяц -->
+  <div class="card" style="padding:16px 20px;">
+    <div style="color:#4A4540;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px;">
+      {{ month_name }} — уникальных участников
+    </div>
+    <div style="display:flex;align-items:baseline;gap:8px;">
+      <span style="font-size:36px;font-weight:700;color:#C9A96E;line-height:1;">{{ unique_this_month }}</span>
+      <span style="font-size:11px;color:#4A4540;letter-spacing:0.06em;">чел. посетили хотя бы раз</span>
+    </div>
+  </div>
+
+  <!-- Список прошедших тренировок -->
+  <div class="card" style="overflow:hidden;">
+    {% for session in sessions %}
+    {% set cnt = counts.get(session.id, 0) %}
+    {% set is_today = session.starts_at.date() == today %}
+
+    <a href="/admin/attendance/{{ session.id }}" style="text-decoration:none;" class="list-row">
+
+      <!-- Дата — крупный блок слева -->
+      <div style="flex-shrink:0;width:48px;text-align:center;margin-right:4px;">
+        <div style="font-size:24px;font-weight:700;line-height:1;
+                    color:{% if is_today %}#C9A96E{% else %}#F5F1EC{% endif %};">
+          {{ session.starts_at.strftime('%d') }}
+        </div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-top:2px;
+                    color:{% if is_today %}#C9A96E{% else %}#4A4540{% endif %};">
+          {{ session.starts_at | weekday_short }}
+        </div>
+        {% if is_today %}
+        <div style="width:4px;height:4px;border-radius:50%;background:#C9A96E;margin:4px auto 0;"></div>
+        {% endif %}
+      </div>
+
+      <!-- Разделитель -->
+      <div style="width:1px;background:rgba(255,255,255,0.06);margin:0 14px;flex-shrink:0;align-self:stretch;"></div>
+
+      <!-- Название + время -->
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#F5F1EC;">
+          {{ session.title }}
+        </div>
+        <div style="margin-top:4px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;font-weight:700;letter-spacing:0.04em;
+                       color:{% if is_today %}#C9A96E{% else %}#9A9590{% endif %};">
+            {{ session.starts_at.strftime('%H:%M') }}
+          </span>
+          {% if session.duration_minutes %}
+          <span style="font-size:10px;color:#3D3A36;">· {{ session.duration_minutes }} мин</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Кол-во посетивших -->
+      <div style="flex-shrink:0;margin-left:12px;text-align:right;min-width:36px;">
+        {% if cnt > 0 %}
+        <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1DB87E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span style="color:#1DB87E;font-size:16px;font-weight:700;line-height:1;">{{ cnt }}</span>
+        </div>
+        {% else %}
+        <span style="color:#3D3A36;font-size:11px;">—</span>
+        {% endif %}
+      </div>
+
+    </a>
+
+    {% else %}
+    <div style="padding:48px 20px;text-align:center;color:#4A4540;font-size:11px;letter-spacing:0.1em;">
+      НЕТ ПРОШЕДШИХ ТРЕНИРОВОК В ЭТОМ МЕСЯЦЕ
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

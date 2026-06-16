@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}Бой — ULTRA{% endblock %}
+{% block content %}
+<div style="max-width:400px;margin:0 auto;" id="app">
+
+  <!-- ═══════════════════ SETUP SCREEN ═══════════════════ -->
+  <div id="screen-setup">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div class="gold-label" style="margin-bottom:6px;">Нерейтинговый</div>
+      <div class="page-title" style="font-size:22px;">Бой</div>
+    </div>
+
+    <div class="card" style="border-radius:20px;">
+      <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Макс. очков</label>
+            <input id="cfg-max" type="number" min="1" class="input" placeholder="∞" value=""/>
+          </div>
+          <div>
+            <label class="section-label" style="display:block;margin-bottom:7px;">Таймер (сек)</label>
+            <input id="cfg-timer" type="number" min="10" class="input" placeholder="—" value=""/>
+          </div>
+        </div>
+        <button onclick="startMatch()" class="btn-primary"
+                style="padding:14px;text-align:center;margin-top:4px;font-size:13px;">
+          Начать бой
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ MATCH SCREEN ═══════════════════ -->
+  <div id="screen-match" style="display:none;flex-direction:column;gap:14px;">
+
+    <!-- Timer -->
+    <div id="timer-wrap" style="display:none;text-align:center;margin-bottom:4px;">
+      <div id="timer-display" class="num-display"
+           style="color:#C9A96E;font-size:64px;font-weight:700;line-height:1;"></div>
+      <button onclick="togglePause()" id="pause-btn"
+              style="margin-top:10px;background:rgba(255,255,255,0.06);color:#9A9590;
+                     border:1px solid rgba(255,255,255,0.08);border-radius:20px;
+                     padding:6px 22px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+                     cursor:pointer;font-family:inherit;transition:all 0.15s;">
+        Пауза
+      </button>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="card" style="border-radius:20px;overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;">
+
+        <!-- LEFT -->
+        <div style="padding:24px 16px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div class="section-label" style="margin-bottom:12px;">Левый</div>
+          <div id="score-left" class="num-display"
+               style="font-size:80px;font-weight:700;line-height:1;color:#F5F1EC;">0</div>
+          <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
+            <button onclick="addScore('left',1)"
+                    style="width:100%;background:#1DB87E;color:#0A0A0A;border:none;border-radius:12px;
+                           padding:18px;font-size:28px;font-weight:700;cursor:pointer;font-family:inherit;
+                           transition:all 0.12s;-webkit-tap-highlight-color:transparent;"
+                    ontouchstart="this.style.transform='scale(0.95)'"
+                    ontouchend="this.style.transform='scale(1)'">+1</button>
+            <button onclick="addScore('left',-1)"
+                    style="width:100%;background:rgba(255,255,255,0.04);color:#4A4540;
+                           border:1px solid rgba(255,255,255,0.07);border-radius:10px;
+                           padding:10px;font-size:14px;cursor:pointer;font-family:inherit;
+                           transition:all 0.12s;letter-spacing:0.06em;-webkit-tap-highlight-color:transparent;">
+              −1
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div style="padding:24px 16px;text-align:center;">
+          <div class="section-label" style="margin-bottom:12px;">Правый</div>
+          <div id="score-right" class="num-display"
+               style="font-size:80px;font-weight:700;line-height:1;color:#F5F1EC;">0</div>
+          <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
+            <button onclick="addScore('right',1)"
+                    style="width:100%;background:#C9A96E;color:#0A0A0A;border:none;border-radius:12px;
+                           padding:18px;font-size:28px;font-weight:700;cursor:pointer;font-family:inherit;
+                           transition:all 0.12s;-webkit-tap-highlight-color:transparent;"
+                    ontouchstart="this.style.transform='scale(0.95)'"
+                    ontouchend="this.style.transform='scale(1)'">+1</button>
+            <button onclick="addScore('right',-1)"
+                    style="width:100%;background:rgba(255,255,255,0.04);color:#4A4540;
+                           border:1px solid rgba(255,255,255,0.07);border-radius:10px;
+                           padding:10px;font-size:14px;cursor:pointer;font-family:inherit;
+                           transition:all 0.12s;letter-spacing:0.06em;-webkit-tap-highlight-color:transparent;">
+              −1
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:10px;">
+        <button onclick="endMatch()" class="btn-gold" style="flex:1;text-align:center;padding:13px;">
+          Завершить
+        </button>
+        <button onclick="resetMatch()" class="btn-ghost" style="padding:13px 18px;">
+          Сброс
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ RESULT SCREEN ═══════════════════ -->
+  <div id="screen-result" style="display:none;">
+    <div class="card card-accent" style="border-radius:20px;text-align:center;">
+      <div class="card-body">
+        <div class="gold-label" style="margin-bottom:16px;">Бой завершён</div>
+
+        <div id="result-winner" class="num-display"
+             style="font-size:18px;font-weight:700;margin-bottom:4px;"></div>
+        <div style="color:#4A4540;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+                    margin-bottom:28px;">Победитель</div>
+
+        <div style="display:flex;justify-content:center;align-items:center;gap:24px;
+                    padding:20px;background:rgba(255,255,255,0.03);border-radius:14px;
+                    border:1px solid rgba(255,255,255,0.06);margin-bottom:24px;">
+          <div style="text-align:center;">
+            <div style="color:#4A4540;font-size:10px;letter-spacing:0.08em;margin-bottom:8px;">Левый</div>
+            <div id="res-left" class="num-display" style="color:#F5F1EC;font-size:48px;font-weight:700;line-height:1;"></div>
+          </div>
+          <div style="color:rgba(255,255,255,0.1);font-size:28px;font-weight:200;">:</div>
+          <div style="text-align:center;">
+            <div style="color:#4A4540;font-size:10px;letter-spacing:0.08em;margin-bottom:8px;">Правый</div>
+            <div id="res-right" class="num-display" style="color:#F5F1EC;font-size:48px;font-weight:700;line-height:1;"></div>
+          </div>
+        </div>
+
+        <button onclick="newMatch()" class="btn-primary" style="padding:12px 32px;">Новый бой</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let leftScore = 0, rightScore = 0;
+let maxScore = null, timerSecs = null;
+let timerRemaining = 0, timerPaused = false, timerInterval = null;
+
+function show(id) {
+  ['screen-setup','screen-match','screen-result'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = s === id ? (s === 'screen-setup' ? 'block' : 'flex') : 'none';
+  });
+  if (id === 'screen-match') document.getElementById('screen-match').style.flexDirection = 'column';
+}
+
+function startMatch() {
+  leftScore = 0; rightScore = 0;
+  maxScore = parseInt(document.getElementById('cfg-max').value) || null;
+  timerSecs = parseInt(document.getElementById('cfg-timer').value) || null;
+
+  updateScoreDisplay();
+  show('screen-match');
+
+  if (timerSecs) {
+    timerRemaining = timerSecs;
+    timerPaused = false;
+    document.getElementById('timer-wrap').style.display = 'block';
+    updateTimerDisplay();
+    timerInterval = setInterval(timerTick, 1000);
+  }
+}
+
+function addScore(side, delta) {
+  if (side === 'left') leftScore = Math.max(0, leftScore + delta);
+  else rightScore = Math.max(0, rightScore + delta);
+  updateScoreDisplay();
+  if (maxScore && (leftScore >= maxScore || rightScore >= maxScore)) endMatch();
+}
+
+function updateScoreDisplay() {
+  document.getElementById('score-left').textContent = leftScore;
+  document.getElementById('score-right').textContent = rightScore;
+  document.getElementById('score-left').style.color = leftScore > rightScore ? '#1DB87E' : '#F5F1EC';
+  document.getElementById('score-right').style.color = rightScore > leftScore ? '#1DB87E' : '#F5F1EC';
+}
+
+function timerTick() {
+  if (timerPaused) return;
+  timerRemaining--;
+  updateTimerDisplay();
+  if (timerRemaining <= 0) { clearInterval(timerInterval); endMatch(); }
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerRemaining / 60);
+  const s = timerRemaining % 60;
+  const el = document.getElementById('timer-display');
+  el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  el.style.color = timerRemaining <= 10 ? '#E05555' : '#C9A96E';
+}
+
+function togglePause() {
+  timerPaused = !timerPaused;
+  document.getElementById('pause-btn').textContent = timerPaused ? 'Продолжить' : 'Пауза';
+}
+
+function endMatch() {
+  clearInterval(timerInterval);
+  document.getElementById('res-left').textContent = leftScore;
+  document.getElementById('res-right').textContent = rightScore;
+  let winnerText;
+  if (leftScore > rightScore) winnerText = 'Левый';
+  else if (rightScore > leftScore) winnerText = 'Правый';
+  else winnerText = 'Ничья';
+  const wr = document.getElementById('result-winner');
+  wr.textContent = winnerText;
+  wr.style.color = winnerText === 'Ничья' ? '#9A9590' : '#C9A96E';
+  show('screen-result');
+}
+
+function resetMatch() {
+  leftScore = 0; rightScore = 0;
+  updateScoreDisplay();
+  if (timerSecs) {
+    clearInterval(timerInterval);
+    timerRemaining = timerSecs;
+    timerPaused = false;
+    document.getElementById('pause-btn').textContent = 'Пауза';
+    updateTimerDisplay();
+    timerInterval = setInterval(timerTick, 1000);
+  }
+}
+
+function newMatch() { show('screen-setup'); clearInterval(timerInterval); }
+</script>
+{% endblock %}

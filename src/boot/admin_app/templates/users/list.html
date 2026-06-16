@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Участники — ULTRA{% endblock %}
+{% block content %}
+
+<div style="display:flex;flex-direction:column;gap:14px;">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="page-title">Участники</div>
+    <a href="/admin/users/pending" class="btn-gold" style="padding:8px 16px;font-size:10px;">
+      Новые заявки
+    </a>
+  </div>
+
+  <!-- Search -->
+  <div class="card" style="border-radius:12px;">
+    <div style="padding:14px 16px;">
+      <form method="get" action="/admin/users">
+        <input type="text" name="q" value="{{ query }}" class="input" placeholder="Поиск по имени, email, телефону…"/>
+      </form>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="card">
+    {% for user in users %}
+    <div class="list-row">
+      <div style="flex:1;min-width:0;">
+        <div style="color:#F5F1EC;font-size:14px;font-weight:500;
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ user.name }}</div>
+        <div style="color:#4A4540;font-size:11px;margin-top:3px;
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          {{ user.email }}
+          {% if user.tel %}<span style="color:#3D3A36;margin:0 4px;">·</span>{{ user.tel }}{% endif %}
+        </div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+          {% if user.role.value == 'admin' %}
+            <span class="badge badge-gold">Админ</span>
+          {% elif user.role.value == 'instructor' %}
+            <span class="badge badge-green">Инструктор</span>
+          {% else %}
+            <span class="badge badge-muted">Участник</span>
+          {% endif %}
+          {% if user.is_blocked %}
+            <span class="badge badge-red">Блок</span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if auth_user.role.value == "admin" %}
+      <div style="flex-shrink:0;margin-left:12px;">
+        <form method="post" action="/admin/users/{{ user.id }}/permissions"
+              style="display:flex;align-items:center;gap:8px;">
+          <select name="role" class="input"
+                  style="width:auto;padding:7px 10px;font-size:11px;border-radius:8px;">
+            {% for role in ["user", "instructor", "admin"] %}
+            <option value="{{ role }}" {% if user.role.value == role %}selected{% endif %}>
+              {{ role | role_label }}
+            </option>
+            {% endfor %}
+          </select>
+          <label class="check-row check-row-danger" style="padding:6px 10px;white-space:nowrap;">
+            <input type="checkbox" name="is_blocked" value="true"
+                   {% if user.is_blocked %}checked{% endif %}/>
+            Блок
+          </label>
+          <button type="submit" class="btn-ghost" style="padding:7px 12px;font-size:10px;">OK</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% else %}
+    <div style="padding:48px 20px;text-align:center;color:#4A4540;font-size:11px;letter-spacing:0.1em;">
+      УЧАСТНИКИ НЕ НАЙДЕНЫ
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

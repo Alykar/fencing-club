@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+{% block title %}Рейтинговый бой — ULTRA{% endblock %}
+{% block content %}
+<div style="max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px;">
+
+{# ─── helpers ─── #}
+{% set lname = left_user.name  if left_user  else "Левый" %}
+{% set rname = right_user.name if right_user else "Правый" %}
+{% set completed_bouts = match.bouts | selectattr("winner_user_id") | list %}
+{% set left_bouts  = completed_bouts | selectattr("winner_user_id","equalto",match.left_user_id)  | list | length %}
+{% set right_bouts = completed_bouts | selectattr("winner_user_id","equalto",match.right_user_id) | list | length %}
+{% set current_bout = match.get_current_bout() %}
+{% set current_bout_idx = (current_bout.bout_number - 1) if current_bout else none %}
+
+{# ════════════════════ ONGOING ════════════════════ #}
+{% if match.status.value == "ongoing" %}
+
+  {# ── Header ── #}
+  <div style="text-align:center;">
+    <div class="gold-label" style="margin-bottom:4px;">Рейтинговый бой</div>
+    <div class="page-title" style="font-size:16px;margin-bottom:6px;">
+      {{ lname }} <span style="color:#4A4540;font-weight:400;">vs</span> {{ rname }}
+    </div>
+    {# 3 bout progress pills #}
+    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:4px;">
+      {% for i in range(1, 4) %}
+      {% set b = match.bouts | selectattr("bout_number","equalto",i) | list | first %}
+      <div style="padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;
+                  letter-spacing:0.08em;
+                  {% if b and b.winner_user_id == match.left_user_id %}
+                    background:rgba(29,184,126,0.15);color:#1DB87E;border:1px solid rgba(29,184,126,0.3);
+                  {% elif b and b.winner_user_id == match.right_user_id %}
+                    background:rgba(201,169,110,0.15);color:#C9A96E;border:1px solid rgba(201,169,110,0.3);
+                  {% elif current_bout and current_bout.bout_number == i %}
+                    background:rgba(255,255,255,0.1);color:#F5F1EC;border:1px solid rgba(255,255,255,0.2);
+                  {% else %}
+                    background:rgba(255,255,255,0.03);color:#3D3A36;border:1px solid rgba(255,255,255,0.07);
+                  {% endif %}">
+        БОЙ {{ i }}
+        {% if b and b.is_complete %}
+        · {% if b.winner_user_id == match.left_user_id %}{{ lname[:8] }}{% else %}{{ rname[:8] }}{% endif %}
+        {% elif current_bout and current_bout.bout_number == i %} ←
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% if current_bout and current_bout_idx is not none and current_bout_idx < bout_weapons | length %}
+    <div style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;
+                background:rgba(201,169,110,0.08);border:1px solid rgba(201,169,110,0.2);
+                border-radius:20px;padding:4px 12px;">
+      <span style="color:#C9A96E;font-size:10px;font-weight:700;letter-spacing:0.1em;">
+        ⚔ {{ bout_weapons[current_bout_idx] | upper }}
+      </span>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── Match score (bouts won) ── #}
+  <div class="card" style="border-radius:18px;overflow:hidden;">
+    <div style="display:grid;grid-template-columns:1fr 60px 1fr;padding:20px 16px;">
+      <div style="text-align:center;">
+        <div style="color:#4A4540;font-size:9px;font-weight:700;letter-spacing:0.1em;
+                    text-transform:uppercase;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          {{ lname }}
+        </div>
+        <div class="num-display" style="font-size:60px;font-weight:700;line-height:1;
+             color:{% if left_bouts > right_bouts %}#1DB87E{% else %}#F5F1EC{% endif %};">
+          {{ left_bouts }}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+        <div style="color:rgba(255,255,255,0.1);font-size:20px;font-weight:200;">:</div>
+        <div style="color:#4A4540;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;
+                    margin-top:2px;">3 боя</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="color:#4A4540;font-size:9px;font-weight:700;letter-spacing:0.1em;
+                    text-transform:uppercase;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          {{ rname }}
+        </div>
+        <div class="num-display" style="font-size:60px;font-weight:700;line-height:1;
+             color:{% if right_bouts > left_bouts %}#1DB87E{% else %}#F5F1EC{% endif %};">
+          {{ right_bouts }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Current bout pass score ── #}
+  {% if current_bout %}
+  {% set lp = current_bout.passes | selectattr("winner_user_id","equalto",match.left_user_id)  | list | length %}
+  {% set rp = current_bout.passes | selectattr("winner_user_id","equalto",match.right_user_id) | list | length %}
+  <div class="card card-accent" style="border-radius:18px;overflow:hidden;">
+    <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="section-label">Бой {{ current_bout.bout_number }} / 3 — сходы</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          {# Pass dots #}
+          {% for i in range(1, 4) %}
+          {% set pp = current_bout.passes | selectattr("pass_number","equalto",i) | list | first %}
+          <div style="width:26px;height:26px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.1);
+               display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;
+               {% if pp and pp.winner_user_id == match.left_user_id %}background:#1DB87E;color:#0A0A0A;border-color:#1DB87E;
+               {% elif pp and pp.winner_user_id == match.right_user_id %}background:#C9A96E;color:#0A0A0A;border-color:#C9A96E;
+               {% else %}color:#3D3A36;{% endif %}">
+            {{ i }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:16px;align-items:center;">
+        <span style="color:{% if lp > rp %}#1DB87E{% else %}#9A9590{% endif %};
+                     font-size:28px;font-weight:700;font-family:inherit;">{{ lp }}</span>
+        <span style="color:#3D3A36;font-size:14px;">:</span>
+        <span style="color:{% if rp > lp %}#C9A96E{% else %}#9A9590{% endif %};
+                     font-size:28px;font-weight:700;font-family:inherit;">{{ rp }}</span>
+        <span style="color:#4A4540;font-size:10px;letter-spacing:0.06em;margin-left:4px;">
+          {{ current_bout.passes | length }} / 3
+        </span>
+      </div>
+    </div>
+
+    <div style="padding:16px 20px;">
+      {% if current_bout.passes | length == 0 %}
+      <div style="text-align:center;margin-bottom:14px;padding:10px 16px;
+                  background:rgba(201,169,110,0.07);border-radius:10px;
+                  border:1px solid rgba(201,169,110,0.18);">
+        <div style="color:#C9A96E;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+                    font-weight:700;">Бой {{ current_bout.bout_number }} начинается</div>
+        {% if current_bout_idx is not none and current_bout_idx < bout_weapons | length %}
+        <div style="color:#9A9590;font-size:12px;margin-top:4px;">{{ bout_weapons[current_bout_idx] }}</div>
+        {% endif %}
+      </div>
+      {% endif %}
+      <div class="section-label" style="margin-bottom:12px;text-align:center;">Кто выиграл сход?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <form method="post" action="/admin/rating/match/{{ match.id }}/pass">
+          <input type="hidden" name="winner_user_id" value="{{ match.left_user_id }}"/>
+          <button style="width:100%;background:#1DB87E;color:#0A0A0A;border:none;border-radius:14px;
+                         padding:20px 8px;font-size:13px;font-weight:700;cursor:pointer;
+                         font-family:inherit;letter-spacing:0.04em;transition:opacity 0.12s;
+                         overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+                         -webkit-tap-highlight-color:transparent;"
+                  ontouchstart="this.style.opacity='0.8'" ontouchend="this.style.opacity='1'">
+            {{ lname }}
+          </button>
+        </form>
+        <form method="post" action="/admin/rating/match/{{ match.id }}/pass">
+          <input type="hidden" name="winner_user_id" value="{{ match.right_user_id }}"/>
+          <button style="width:100%;background:#C9A96E;color:#0A0A0A;border:none;border-radius:14px;
+                         padding:20px 8px;font-size:13px;font-weight:700;cursor:pointer;
+                         font-family:inherit;letter-spacing:0.04em;transition:opacity 0.12s;
+                         overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+                         -webkit-tap-highlight-color:transparent;"
+                  ontouchstart="this.style.opacity='0.8'" ontouchend="this.style.opacity='1'">
+            {{ rname }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── Completed bouts history ── #}
+  {% if completed_bouts %}
+  <div class="card" style="overflow:hidden;">
+    <div class="card-section">
+      <div class="section-label">Завершённые бои</div>
+    </div>
+    {% for bout in completed_bouts %}
+    {% set bi = bout.bout_number - 1 %}
+    {% set bl = bout.passes | selectattr("winner_user_id","equalto",match.left_user_id)  | list | length %}
+    {% set br = bout.passes | selectattr("winner_user_id","equalto",match.right_user_id) | list | length %}
+    <div class="list-row" style="gap:12px;">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="color:#4A4540;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+                       font-weight:700;">БОЙ {{ bout.bout_number }}</span>
+          {% if bi < bout_weapons | length %}
+          <span class="badge badge-muted">{{ bout_weapons[bi] }}</span>
+          {% endif %}
+        </div>
+        <div style="font-size:12px;color:#9A9590;">
+          Сходы: <span style="color:#F5F1EC;font-weight:600;">{{ bl }}:{{ br }}</span>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        {% if bout.winner_user_id == match.left_user_id %}
+        <div style="color:#1DB87E;font-size:12px;font-weight:700;letter-spacing:0.04em;">{{ lname }}</div>
+        {% else %}
+        <div style="color:#C9A96E;font-size:12px;font-weight:700;letter-spacing:0.04em;">{{ rname }}</div>
+        {% endif %}
+        <div style="color:#4A4540;font-size:9px;letter-spacing:0.08em;margin-top:2px;">Победа</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+{# ════════════════════ COMPLETED ════════════════════ #}
+{% else %}
+{% set winner = left_user if match.winner_user_id == match.left_user_id else right_user %}
+{% set left_elo_after  = left_rating.elo  if left_rating  else none %}
+{% set right_elo_after = right_rating.elo if right_rating else none %}
+
+  {# ── Per-bout scorecard ── #}
+  <div class="card" style="overflow:hidden;border-radius:18px;">
+    {% for bout in match.bouts %}
+    {% set bi = bout.bout_number - 1 %}
+    {% set bl = bout.passes | selectattr("winner_user_id","equalto",match.left_user_id)  | list | length %}
+    {% set br = bout.passes | selectattr("winner_user_id","equalto",match.right_user_id) | list | length %}
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:14px 20px;
+                {% if not loop.last %}border-bottom:1px solid rgba(255,255,255,0.05);{% endif %}">
+      {# Weapon label #}
+      <div style="min-width:0;flex:1;margin-right:12px;">
+        <div style="color:#4A4540;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+                    font-weight:700;margin-bottom:3px;">Бой {{ bout.bout_number }}</div>
+        <div style="color:#9A9590;font-size:13px;">
+          {% if bi < bout_weapons | length %}{{ bout_weapons[bi] }}{% else %}—{% endif %}
+        </div>
+      </div>
+      {# Score #}
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <span class="num-display" style="font-size:24px;font-weight:700;
+              color:{% if bl > br %}#F5F1EC{% else %}#4A4540{% endif %};">{{ bl }}</span>
+        <span style="color:#3D3A36;font-size:14px;font-weight:300;">—</span>
+        <span class="num-display" style="font-size:24px;font-weight:700;
+              color:{% if br > bl %}#F5F1EC{% else %}#4A4540{% endif %};">{{ br }}</span>
+      </div>
+    </div>
+    {% endfor %}
+
+    {# Divider #}
+    <div style="height:1px;background:rgba(201,169,110,0.2);margin:0 20px;"></div>
+
+    {# Final bout score #}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;">
+      <div style="color:#C9A96E;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">
+        Итог
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="num-display" style="font-size:28px;font-weight:700;
+              color:{% if match.winner_user_id == match.left_user_id %}#1DB87E{% else %}#4A4540{% endif %};">
+          {{ left_bouts }}
+        </span>
+        <span style="color:#3D3A36;font-size:16px;font-weight:300;">—</span>
+        <span class="num-display" style="font-size:28px;font-weight:700;
+              color:{% if match.winner_user_id == match.right_user_id %}#1DB87E{% else %}#4A4540{% endif %};">
+          {{ right_bouts }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {# ── Winner banner ── #}
+  <div class="card card-accent" style="border-radius:18px;padding:22px 20px;text-align:center;">
+    <div style="color:#4A4540;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;
+                font-weight:700;margin-bottom:8px;">Победа</div>
+    <div class="num-display" style="color:#C9A96E;font-size:28px;font-weight:700;">
+      {{ winner.name if winner else "—" }}
+    </div>
+  </div>
+
+  {# ── ELO change ── #}
+  {% if match.left_elo_before is not none and left_elo_after is not none %}
+  <div class="card" style="border-radius:18px;overflow:hidden;">
+    <div class="card-section">
+      <div class="gold-label">Изменение рейтинга</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;">
+      {# Left #}
+      {% set l_delta = left_elo_after - match.left_elo_before %}
+      <div style="padding:18px 20px;text-align:center;border-right:1px solid rgba(255,255,255,0.05);">
+        <div style="color:#4A4540;font-size:9px;letter-spacing:0.08em;margin-bottom:10px;
+                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ lname }}</div>
+        <div class="num-display" style="color:#C9A96E;font-size:26px;font-weight:700;">
+          {{ "%.0f" | format(left_elo_after) }}
+        </div>
+        <div style="font-size:12px;font-weight:700;margin-top:5px;
+             color:{% if l_delta >= 0 %}#1DB87E{% else %}#E05555{% endif %};">
+          {% if l_delta >= 0 %}+{% endif %}{{ "%.0f" | format(l_delta) }}
+        </div>
+        <div style="color:#3D3A36;font-size:9px;margin-top:3px;">
+          было {{ "%.0f" | format(match.left_elo_before) }}
+        </div>
+      </div>
+      {# Right #}
+      {% set r_delta = right_elo_after - match.right_elo_before %}
+      <div style="padding:18px 20px;text-align:center;">
+        <div style="color:#4A4540;font-size:9px;letter-spacing:0.08em;margin-bottom:10px;
+                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ rname }}</div>
+        <div class="num-display" style="color:#C9A96E;font-size:26px;font-weight:700;">
+          {{ "%.0f" | format(right_elo_after) }}
+        </div>
+        <div style="font-size:12px;font-weight:700;margin-top:5px;
+             color:{% if r_delta >= 0 %}#1DB87E{% else %}#E05555{% endif %};">
+          {% if r_delta >= 0 %}+{% endif %}{{ "%.0f" | format(r_delta) }}
+        </div>
+        <div style="color:#3D3A36;font-size:9px;margin-top:3px;">
+          было {{ "%.0f" | format(match.right_elo_before) }}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <a href="/admin/rating" class="btn-primary"
+     style="display:block;text-align:center;padding:13px;text-decoration:none;">
+    К рейтингу
+  </a>
+{% endif %}
+
+</div>
+{% endblock %}

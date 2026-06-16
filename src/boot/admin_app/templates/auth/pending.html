@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Заявка на рассмотрении — ULTRA Fencing Club{% endblock %}
+{% block content %}
+
+<div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+
+  <div style="text-align:center;margin-bottom:36px;">
+    <img src="/static/logo.svg" alt="ULTRA Fencing Club"
+         style="width:80px;height:80px;border-radius:50%;margin:0 auto 20px;display:block;
+                box-shadow:0 0 32px rgba(201,169,110,0.15);"/>
+    <div style="color:#C9A96E;font-size:18px;font-weight:700;letter-spacing:0.28em;">ULTRA</div>
+    <div style="color:#4A4540;font-size:9px;letter-spacing:0.18em;margin-top:4px;">FENCING CLUB</div>
+  </div>
+
+  <div style="width:100%;max-width:340px;" class="card card-accent" style="border-radius:20px;">
+    <div style="padding:28px;text-align:center;">
+      <h1 style="color:#F5F1EC;font-size:14px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">
+        Заявка принята
+      </h1>
+      <p style="color:#9A9590;font-size:13px;line-height:1.7;margin-bottom:12px;">
+        Вы можете войти прямо сейчас.<br>
+        Проходка в зал будет выдана перед первой тренировкой.
+      </p>
+      <p style="color:#4A4540;font-size:11px;letter-spacing:0.04em;">
+        Есть вопросы? Напишите нам —
+        <a href="https://t.me/ultra_tsk" target="_blank"
+           style="color:#C9A96E;text-decoration:none;"
+           onmouseover="this.style.color='#E8C97A'" onmouseout="this.style.color='#C9A96E'">
+          t.me/ultra_tsk
+        </a>
+      </p>
+
+      <div style="height:1px;background:rgba(255,255,255,0.05);margin:24px 0;"></div>
+
+      <a href="/admin/auth/login"
+         style="display:inline-block;padding:10px 28px;border-radius:10px;
+                background:#C9A96E;color:#0A0A0A;font-size:11px;font-weight:700;
+                letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;
+                transition:background 0.15s;"
+         onmouseover="this.style.background='#E8C97A'" onmouseout="this.style.background='#C9A96E'">
+        Войти →
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

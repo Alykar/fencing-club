@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Рейтинг — ULTRA{% endblock %}
+{% block content %}
+<div style="display:flex;flex-direction:column;gap:16px;">
+
+  <div class="page-title">Рейтинг</div>
+
+  <!-- ── Таблица лидеров ──────────────────────────────────── -->
+  <div class="card" style="overflow:hidden;">
+    <div class="card-section" style="display:flex;align-items:baseline;justify-content:space-between;">
+      <div class="page-title" style="font-size:14px;">Таблица лидеров</div>
+    </div>
+
+    {% if leaderboard %}
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.02);">
+            <th style="padding:10px 16px;text-align:left;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);">#</th>
+            <th style="padding:10px 12px;text-align:left;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);">Участник</th>
+            <th style="padding:10px 12px;text-align:right;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);">ELO</th>
+            <th style="padding:10px 12px;text-align:right;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);">Победы</th>
+            <th style="padding:10px 16px;text-align:right;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#3D3A36;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);">Матчей</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in leaderboard if not entry.calibrating %}
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.1s;"
+              onmouseover="this.style.background='rgba(255,255,255,0.02)'"
+              onmouseout="this.style.background=''">
+            <td style="padding:14px 16px;">
+              {% if loop.index == 1 %}
+              <span style="color:#C9A96E;font-size:18px;line-height:1;">★</span>
+              {% elif loop.index == 2 %}
+              <span class="num-display" style="color:#9A9590;font-size:14px;">2</span>
+              {% elif loop.index == 3 %}
+              <span class="num-display" style="color:#8A7248;font-size:14px;">3</span>
+              {% else %}
+              <span class="num-display" style="color:#4A4540;font-size:12px;">{{ loop.index }}</span>
+              {% endif %}
+            </td>
+            <td style="padding:14px 12px;">
+              <span style="color:{% if loop.index == 1 %}#F5F1EC{% else %}#9A9590{% endif %};
+                           font-size:14px;font-weight:{% if loop.index == 1 %}600{% else %}400{% endif %};">
+                {{ entry.name }}
+              </span>
+            </td>
+            <td style="padding:14px 12px;text-align:right;">
+              <span class="num-display" style="color:#C9A96E;font-size:{% if loop.index == 1 %}20px{% else %}16px{% endif %};">
+                {{ entry.elo }}
+              </span>
+            </td>
+            <td style="padding:14px 12px;text-align:right;">
+              <span style="font-size:12px;font-weight:700;
+                           color:{% if entry.win_rate >= 60 %}#1DB87E{% elif entry.win_rate >= 40 %}#C9A96E{% else %}#E05555{% endif %};">
+                {{ entry.win_rate }}%
+              </span>
+              <div style="color:#3D3A36;font-size:9px;margin-top:1px;">{{ entry.wins }}/{{ entry.matches }}</div>
+            </td>
+            <td style="padding:14px 16px;text-align:right;">
+              <span class="num-display" style="color:#4A4540;font-size:12px;">{{ entry.matches }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="padding:48px 20px;text-align:center;color:#4A4540;font-size:11px;letter-spacing:0.1em;">
+      ОТКАЛИБРОВАННЫХ УЧАСТНИКОВ ПОКА НЕТ<br>
+      <span style="font-size:10px;color:#3D3A36;margin-top:6px;display:block;">Необходимо сыграть не менее 10 матчей</span>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
