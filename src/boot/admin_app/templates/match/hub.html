@@ -6,7 +6,7 @@
   <div class="page-title">Бои и Табата</div>
 
   <!-- Нерейтинговый бой -->
-  <a href="/admin/match/start" style="text-decoration:none;display:block;">
+  <a href="/match/start" style="text-decoration:none;display:block;">
     <div class="card" style="border-radius:20px;padding:24px;transition:transform 0.15s,box-shadow 0.15s;border:1px solid rgba(201,169,110,0.15);"
          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(201,169,110,0.10)'"
          onmouseout="this.style.transform='';this.style.boxShadow=''">
@@ -38,7 +38,7 @@
 
   <!-- Рейтинговый матч — только instructor+ -->
   {% if auth_user.role.value in ("instructor", "admin") %}
-  <a href="/admin/rating/new" style="text-decoration:none;display:block;">
+  <a href="/rating/new" style="text-decoration:none;display:block;">
     <div class="card" style="border-radius:20px;padding:24px;transition:transform 0.15s,box-shadow 0.15s;border:1px solid rgba(29,184,126,0.15);"
          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(29,184,126,0.10)'"
          onmouseout="this.style.transform='';this.style.boxShadow=''">
@@ -74,7 +74,7 @@
   {% endif %}
 
   <!-- Табата -->
-  <a href="/admin/tabata" style="text-decoration:none;display:block;">
+  <a href="/tabata" style="text-decoration:none;display:block;">
     <div class="card" style="border-radius:20px;padding:24px 24px;transition:transform 0.15s,box-shadow 0.15s;border:1px solid rgba(255,255,255,0.05);"
          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(255,255,255,0.04)'"
          onmouseout="this.style.transform='';this.style.boxShadow=''">

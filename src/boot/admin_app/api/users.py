@@ -62,7 +62,7 @@ async def grant_access(
     use_case: GrantHallAccessUseCase = Depends(depends(GrantHallAccessUseCase)),
 ):
     await use_case(auth_user, user_id)
-    return RedirectResponse(url="/admin/users/pending", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/users/pending", status_code=HTTP_303_SEE_OTHER)
 
 
 @router.post("/users/{user_id}/permissions")
@@ -74,4 +74,4 @@ async def update_permissions(
     use_case: UpdatePermissionsUseCase = Depends(depends(UpdatePermissionsUseCase)),
 ):
     await use_case(auth_user, user_id, UpdatePermissionsInput(role=role, is_blocked=is_blocked))
-    return RedirectResponse(url="/admin/users", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/users", status_code=HTTP_303_SEE_OTHER)

@@ -5,7 +5,7 @@
 
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
     <div class="page-title">Расписание</div>
-    <form method="post" action="/admin/schedule/populate" style="margin:0;">
+    <form method="post" action="/schedule/populate" style="margin:0;">
       <button type="submit" class="btn-ghost"
               style="padding:7px 14px;font-size:11px;letter-spacing:0.08em;"
               title="Сгенерировать тренировки на текущий и следующие 2 месяца">
@@ -34,7 +34,7 @@
       <div class="gold-label">Добавить занятие / ивент</div>
     </div>
     <div class="card-body">
-      <form method="post" action="/admin/schedule" style="display:flex;flex-direction:column;gap:14px;"
+      <form method="post" action="/schedule" style="display:flex;flex-direction:column;gap:14px;"
             id="sch-form">
 
         <div>
@@ -166,7 +166,7 @@
         {% endif %}
       </div>
       {% if auth_user.role.value == "admin" %}
-      <form method="post" action="/admin/schedule/{{ schedule.id }}/deactivate" style="flex-shrink:0;">
+      <form method="post" action="/schedule/{{ schedule.id }}/deactivate" style="flex-shrink:0;">
         <button class="btn-danger">Убрать</button>
       </form>
       {% endif %}

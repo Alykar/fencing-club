@@ -77,7 +77,7 @@ async def create_schedule(
             populate_to=populate_to or None,
         ),
     )
-    return RedirectResponse(url="/admin/schedule", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/schedule", status_code=HTTP_303_SEE_OTHER)
 
 
 @router.post("/schedule/populate")
@@ -98,7 +98,7 @@ async def populate_sessions(
         count += await use_case(first.year, first.month)
 
     return RedirectResponse(
-        url=f"/admin/schedule?populated={count}",
+        url=f"/schedule?populated={count}",
         status_code=HTTP_303_SEE_OTHER,
     )
 
@@ -110,4 +110,4 @@ async def deactivate_schedule(
     use_case: DeactivateScheduleUseCase = Depends(depends(DeactivateScheduleUseCase)),
 ):
     await use_case(auth_user, schedule_id)
-    return RedirectResponse(url="/admin/schedule", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/schedule", status_code=HTTP_303_SEE_OTHER)

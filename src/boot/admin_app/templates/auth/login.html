@@ -28,7 +28,7 @@
         <div class="alert-error" style="margin-bottom:20px;">{{ error }}</div>
         {% endif %}
 
-        <form method="post" action="/admin/auth/login" class="space-y-4">
+        <form method="post" action="/auth/login" class="space-y-4">
           <div>
             <label class="section-label" style="display:block;margin-bottom:8px;">Email</label>
             <input type="email" name="email" required autofocus class="input" placeholder="you@example.com"/>
@@ -49,7 +49,7 @@
         <div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:20px;"></div>
         <p style="text-align:center;font-size:11px;color:#4A4540;letter-spacing:0.06em;">
           Ещё не подавали заявку?
-          <a href="/admin/auth/register" style="color:#1DB87E;font-weight:700;text-decoration:none;margin-left:4px;">
+          <a href="/auth/register" style="color:#1DB87E;font-weight:700;text-decoration:none;margin-left:4px;">
             Регистрация →
           </a>
         </p>

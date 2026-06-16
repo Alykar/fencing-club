@@ -16,11 +16,11 @@ _ROLE_LEVEL = {UserRole.USER: 0, UserRole.INSTRUCTOR: 1, UserRole.ADMIN: 2}
 
 _LOGIN_REDIRECT = HTTPException(
     status_code=HTTP_303_SEE_OTHER,
-    headers={"Location": "/admin/auth/register"},
+    headers={"Location": "/auth/register"},
 )
 _PENDING_REDIRECT = HTTPException(
     status_code=HTTP_303_SEE_OTHER,
-    headers={"Location": "/admin/auth/pending"},
+    headers={"Location": "/auth/pending"},
 )
 
 

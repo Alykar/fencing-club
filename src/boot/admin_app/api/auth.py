@@ -71,7 +71,7 @@ async def login(
         )
 
     secure = _secure(request)
-    resp = RedirectResponse(url="/admin/profile", status_code=HTTP_303_SEE_OTHER)
+    resp = RedirectResponse(url="/profile", status_code=HTTP_303_SEE_OTHER)
     _set_auth_cookies(resp, tokens, secure)
     return resp
 
@@ -127,7 +127,7 @@ async def register(
     except ValueError as exc:
         error = str(exc)
     else:
-        return RedirectResponse(url="/admin/auth/pending", status_code=HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/auth/pending", status_code=HTTP_303_SEE_OTHER)
 
     return templates().TemplateResponse(
         request,
@@ -140,7 +140,7 @@ async def register(
 @router.post("/auth/logout")
 async def logout(request: Request):
     secure = _secure(request)
-    resp = RedirectResponse(url="/admin/auth/login", status_code=HTTP_303_SEE_OTHER)
+    resp = RedirectResponse(url="/auth/login", status_code=HTTP_303_SEE_OTHER)
     resp.delete_cookie("access_token", httponly=True, samesite="lax", secure=secure)
     resp.delete_cookie("refresh_token", httponly=True, samesite="lax", secure=secure)
     return resp

@@ -37,7 +37,7 @@ def templates() -> Jinja2Templates:
 @router.get("/leaderboard", response_class=HTMLResponse)
 async def leaderboard_redirect(request: Request, auth_user: AuthUser = Depends(get_auth_user)):
     from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/admin/rating", status_code=301)
+    return RedirectResponse(url="/rating", status_code=301)
 
 
 @router.get("/rating", response_class=HTMLResponse)
@@ -106,7 +106,7 @@ async def create_rating_match(
             weapon_type_ids=weapon_type_ids,
         ),
     )
-    return RedirectResponse(url=f"/admin/rating/match/{match.id}", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/rating/match/{match.id}", status_code=HTTP_303_SEE_OTHER)
 
 
 @router.get("/rating/match/{match_id}", response_class=HTMLResponse)
@@ -155,7 +155,7 @@ async def record_pass(
     use_case: RecordPassUseCase = Depends(depends(RecordPassUseCase)),
 ):
     await use_case(auth_user, match_id, RecordPassInput(winner_user_id=winner_user_id))
-    return RedirectResponse(url=f"/admin/rating/match/{match_id}", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/rating/match/{match_id}", status_code=HTTP_303_SEE_OTHER)
 
 
 @router.post("/rating/weapons")
@@ -165,4 +165,4 @@ async def create_weapon(
     use_case: CreateWeaponTypeUseCase = Depends(depends(CreateWeaponTypeUseCase)),
 ):
     await use_case(auth_user, CreateWeaponTypeInput(name=name))
-    return RedirectResponse(url="/admin/rating", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/rating", status_code=HTTP_303_SEE_OTHER)

@@ -76,7 +76,7 @@ class PendingCountMiddleware(BaseHTTPMiddleware):
         request.state.pending_count = 0
         # Only run for authenticated HTML pages; skip auth and static routes
         path = request.url.path
-        if not path.startswith("/admin/auth") and not path.startswith("/static"):
+        if not path.startswith("/auth") and not path.startswith("/static"):
             try:
                 from domain.ports.repositories.users import UsersRepo
                 container: Container = request.app.state.container
@@ -184,24 +184,28 @@ def setup_admin(app: FastAPI, container: Container, *, secure_cookies: bool = Fa
     for module in (auth, profile, users, attendance, payment, schedule, match, rating, tabata):
         module.set_templates(templates)
 
-    prefix = "/admin"
-    app.include_router(auth.router, prefix=prefix)
-    app.include_router(profile.router, prefix=prefix)
-    app.include_router(users.router, prefix=prefix)
-    app.include_router(attendance.router, prefix=prefix)
-    app.include_router(payment.router, prefix=prefix)
-    app.include_router(schedule.router, prefix=prefix)
-    app.include_router(match.router, prefix=prefix)
-    app.include_router(rating.router, prefix=prefix)
-    app.include_router(tabata.router, prefix=prefix)
+    app.include_router(auth.router)
+    app.include_router(profile.router)
+    app.include_router(users.router)
+    app.include_router(attendance.router)
+    app.include_router(payment.router)
+    app.include_router(schedule.router)
+    app.include_router(match.router)
+    app.include_router(rating.router)
+    app.include_router(tabata.router)
 
     if _STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
     @app.get("/")
-    async def root() -> RedirectResponse:
-        return RedirectResponse(url="/admin/profile")
-
-    @app.get("/admin")
-    async def admin_root() -> RedirectResponse:
-        return RedirectResponse(url="/admin/profile")
+    async def root(request: Request) -> RedirectResponse:
+        token = request.cookies.get("access_token")
+        if token:
+            try:
+                from domain.ports.access_manager import AccessManager
+                am: AccessManager = container[AccessManager]
+                am.decode_access_token(token)
+                return RedirectResponse(url="/profile")
+            except Exception:  # noqa: BLE001
+                pass
+        return RedirectResponse(url="/auth/register")

@@ -73,7 +73,7 @@
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
         {% if week_offset > 0 %}
-        <a href="/admin/profile?week_offset={{ week_offset - 1 }}"
+        <a href="/profile?week_offset={{ week_offset - 1 }}"
            style="display:flex;align-items:center;justify-content:center;
                   width:30px;height:30px;border-radius:8px;
                   background:rgba(255,255,255,0.05);color:#9A9590;
@@ -85,7 +85,7 @@
                      width:30px;height:30px;border-radius:8px;
                      background:rgba(255,255,255,0.02);color:#3D3A36;font-size:16px;cursor:default;">‹</span>
         {% endif %}
-        <a href="/admin/profile?week_offset={{ week_offset + 1 }}"
+        <a href="/profile?week_offset={{ week_offset + 1 }}"
            style="display:flex;align-items:center;justify-content:center;
                   width:30px;height:30px;border-radius:8px;
                   background:rgba(255,255,255,0.05);color:#9A9590;
@@ -160,7 +160,7 @@
       <div class="section-label">Личные данные</div>
     </div>
     <div class="card-body">
-      <form method="post" action="/admin/profile" style="display:flex;flex-direction:column;gap:14px;">
+      <form method="post" action="/profile" style="display:flex;flex-direction:column;gap:14px;">
         <div>
           <label class="section-label" style="display:block;margin-bottom:7px;">ФИО</label>
           <input type="text" name="name" value="{{ user.name }}" class="input"/>
@@ -191,9 +191,9 @@
   <!-- ── Быстрый доступ ─────────────────────────────────────── -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
     {% for url, icon_path, label in [
-      ("/admin/match",  "M18 6L6 18M6 6l12 12", "Матч"),
-      ("/admin/rating", "M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M18 2H6v7a6 6 0 0 0 12 0V2Z", "Рейтинг"),
-      ("/admin/tabata", "", "Табата"),
+      ("/match",  "M18 6L6 18M6 6l12 12", "Матч"),
+      ("/rating", "M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M18 2H6v7a6 6 0 0 0 12 0V2Z", "Рейтинг"),
+      ("/tabata", "", "Табата"),
     ] %}
     <a href="{{ url }}" style="text-decoration:none;">
       <div class="card" style="border-radius:14px;padding:18px 12px;text-align:center;transition:border-color 0.15s;"

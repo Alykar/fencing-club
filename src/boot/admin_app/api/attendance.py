@@ -128,7 +128,7 @@ async def mark(
     use_case: MarkAttendanceUseCase = Depends(depends(MarkAttendanceUseCase)),
 ):
     await use_case(auth_user, session_id, user_id)
-    return RedirectResponse(url=f"/admin/attendance/{session_id}", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/attendance/{session_id}", status_code=HTTP_303_SEE_OTHER)
 
 
 @router.post("/attendance/{session_id}/unmark/{user_id}")
@@ -139,4 +139,4 @@ async def unmark(
     use_case: UnmarkAttendanceUseCase = Depends(depends(UnmarkAttendanceUseCase)),
 ):
     await use_case(auth_user, session_id, user_id)
-    return RedirectResponse(url=f"/admin/attendance/{session_id}", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/attendance/{session_id}", status_code=HTTP_303_SEE_OTHER)

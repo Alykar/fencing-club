@@ -7,7 +7,7 @@
   <!-- Header -->
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
     <div>
-      <a href="/admin/attendance"
+      <a href="/attendance"
          style="color:#4A4540;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;
                 display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;transition:color 0.15s;"
          onmouseover="this.style.color='#9A9590'" onmouseout="this.style.color='#4A4540'">
@@ -57,7 +57,7 @@
       <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);
                   flex-shrink:0;">
         {# "Был" — всегда mark; активен когда attended=True #}
-        <form method="post" action="/admin/attendance/{{ session_id }}/mark/{{ user.id }}">
+        <form method="post" action="/attendance/{{ session_id }}/mark/{{ user.id }}">
           <button type="submit"
                   style="padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:0.06em;
                          text-transform:uppercase;border:none;cursor:pointer;transition:background 0.15s;
@@ -68,7 +68,7 @@
         </form>
         <div style="width:1px;background:rgba(255,255,255,0.08);flex-shrink:0;"></div>
         {# "Нет" — всегда unmark; активен когда attended=False #}
-        <form method="post" action="/admin/attendance/{{ session_id }}/unmark/{{ user.id }}">
+        <form method="post" action="/attendance/{{ session_id }}/unmark/{{ user.id }}">
           <button type="submit"
                   style="padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:0.06em;
                          text-transform:uppercase;border:none;cursor:pointer;transition:background 0.15s;

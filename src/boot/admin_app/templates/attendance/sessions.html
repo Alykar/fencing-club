@@ -22,7 +22,7 @@
     {% set cnt = counts.get(session.id, 0) %}
     {% set is_today = session.starts_at.date() == today %}
 
-    <a href="/admin/attendance/{{ session.id }}" style="text-decoration:none;" class="list-row">
+    <a href="/attendance/{{ session.id }}" style="text-decoration:none;" class="list-row">
 
       <!-- Дата — крупный блок слева -->
       <div style="flex-shrink:0;width:48px;text-align:center;margin-right:4px;">

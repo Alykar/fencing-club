@@ -4,7 +4,7 @@
 <div style="max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
 
   <div style="display:flex;align-items:center;gap:12px;">
-    <a href="/admin/match" style="color:#4A4540;text-decoration:none;font-size:20px;line-height:1;
+    <a href="/match" style="color:#4A4540;text-decoration:none;font-size:20px;line-height:1;
                                    transition:color 0.15s;" onmouseover="this.style.color='#9A9590'" onmouseout="this.style.color='#4A4540'">←</a>
     <div>
       <div style="color:#1DB87E;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:2px;">Рейтинговый</div>
@@ -14,7 +14,7 @@
 
   <div class="card" style="border-radius:20px;border:1px solid rgba(29,184,126,0.15);">
     <div class="card-body">
-      <form method="post" action="/admin/rating/match" style="display:flex;flex-direction:column;gap:16px;">
+      <form method="post" action="/rating/match" style="display:flex;flex-direction:column;gap:16px;">
 
         <!-- Участники -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -67,7 +67,7 @@
       <!-- Добавить оружие -->
       <div style="height:1px;background:rgba(255,255,255,0.05);margin:20px 0;"></div>
       <div class="section-label" style="margin-bottom:10px;">Добавить новое оружие</div>
-      <form method="post" action="/admin/rating/weapons" style="display:flex;gap:10px;">
+      <form method="post" action="/rating/weapons" style="display:flex;gap:10px;">
         <input type="text" name="name" required class="input" placeholder="Название оружия"/>
         <button type="submit" class="btn-ghost" style="flex-shrink:0;padding:10px 18px;">+</button>
       </form>

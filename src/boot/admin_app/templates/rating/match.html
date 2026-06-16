@@ -136,7 +136,7 @@
       {% endif %}
       <div class="section-label" style="margin-bottom:12px;text-align:center;">Кто выиграл сход?</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <form method="post" action="/admin/rating/match/{{ match.id }}/pass">
+        <form method="post" action="/rating/match/{{ match.id }}/pass">
           <input type="hidden" name="winner_user_id" value="{{ match.left_user_id }}"/>
           <button style="width:100%;background:#1DB87E;color:#0A0A0A;border:none;border-radius:14px;
                          padding:20px 8px;font-size:13px;font-weight:700;cursor:pointer;
@@ -147,7 +147,7 @@
             {{ lname }}
           </button>
         </form>
-        <form method="post" action="/admin/rating/match/{{ match.id }}/pass">
+        <form method="post" action="/rating/match/{{ match.id }}/pass">
           <input type="hidden" name="winner_user_id" value="{{ match.right_user_id }}"/>
           <button style="width:100%;background:#C9A96E;color:#0A0A0A;border:none;border-radius:14px;
                          padding:20px 8px;font-size:13px;font-weight:700;cursor:pointer;
@@ -307,7 +307,7 @@
   </div>
   {% endif %}
 
-  <a href="/admin/rating" class="btn-primary"
+  <a href="/rating" class="btn-primary"
      style="display:block;text-align:center;padding:13px;text-decoration:none;">
     К рейтингу
   </a>

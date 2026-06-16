@@ -5,7 +5,7 @@
 
   <div style="display:flex;align-items:center;justify-content:space-between;">
     <div class="page-title">Новые заявки</div>
-    <a href="/admin/users" class="btn-ghost" style="padding:8px 14px;font-size:10px;">← Участники</a>
+    <a href="/users" class="btn-ghost" style="padding:8px 14px;font-size:10px;">← Участники</a>
   </div>
 
   <div class="card">
@@ -25,7 +25,7 @@
           {{ member.created_at.strftime('%d.%m.%Y') }}
         </div>
       </div>
-      <form method="post" action="/admin/users/{{ member.id }}/grant-access" style="flex-shrink:0;margin-top:2px;">
+      <form method="post" action="/users/{{ member.id }}/grant-access" style="flex-shrink:0;margin-top:2px;">
         <button class="btn-primary" style="padding:10px 16px;font-size:10px;white-space:nowrap;">
           Выдать проходку
         </button>

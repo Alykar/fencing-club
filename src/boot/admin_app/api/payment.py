@@ -171,7 +171,7 @@ async def create_payment(
             note=note or None,
         ),
     )
-    return RedirectResponse(url="/admin/payment", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/payment", status_code=HTTP_303_SEE_OTHER)
 
 
 @router.post("/payment/{payment_id}/delete")
@@ -181,4 +181,4 @@ async def delete_payment(
     use_case: DeletePaymentUseCase = Depends(depends(DeletePaymentUseCase)),
 ):
     await use_case(auth_user, payment_id)
-    return RedirectResponse(url="/admin/payment", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/payment", status_code=HTTP_303_SEE_OTHER)

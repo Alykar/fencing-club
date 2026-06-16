@@ -118,4 +118,4 @@ async def update_profile(
         auth_user.id,
         UpdateProfileInput(name=name, tel=tel, tg=tg or None, vk=vk or None),
     )
-    return RedirectResponse(url="/admin/profile", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/profile", status_code=HTTP_303_SEE_OTHER)
